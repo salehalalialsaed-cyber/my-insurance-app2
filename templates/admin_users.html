@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>إدارة المستخدمين والصلاحيات</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+      crossorigin="anonymous" referrerpolicy="no-referrer">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: { cairo: ['Cairo', 'Segoe UI', 'Tahoma', 'sans-serif'] },
+        colors: {
+          navy: { dark: '#125A78', mid: '#0d435b', 950: '#081f33' },
+          teal: { DEFAULT: '#28A3CC', dark: '#1e83a4', light: '#e8f7fb' },
+          gold: { DEFAULT: '#C9A227', light: '#E4C874', dark: '#a0801d' }
+        },
+        boxShadow: {
+          glass: '0 8px 32px 0 rgba(18, 90, 120, 0.15)',
+          'glass-hover': '0 14px 40px 0 rgba(40, 163, 204, 0.25)',
+        }
+      }
+    }
+  };
+</script>
+<style>
+  html, body { height: 100%; margin: 0; }
+  body { 
+    font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif; 
+    background: linear-gradient(135deg, #28A3CC 0%, #125A78 100%);
+    background-attachment: fixed;
+    overflow: hidden; 
+  }
+  .glass-card {
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+  }
+  .glass-nav {
+    background: rgba(18, 90, 120, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 2px solid #C9A227;
+  }
+  .table-scroll-wrapper::-webkit-scrollbar { width: 8px; height: 8px; }
+  .table-scroll-wrapper::-webkit-scrollbar-thumb { background: #C9A227; border-radius: 8px; }
+  .table-scroll-wrapper::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.1); }
+</style>
+</head>
+<body class="font-cairo text-slate-700">
+
+<div class="h-screen flex flex-col overflow-hidden">
+
+  <!-- الهيدر العلوي (مطابق لشاشة الإدارة) -->
+  <nav class="shrink-0 glass-nav shadow-lg text-white">
+    <div class="px-4 sm:px-6 py-3 flex items-center justify-between flex-wrap gap-3">
+      <a href="{{ url_for('admin.admin_requests') }}" class="flex items-center gap-2 font-extrabold text-lg text-white">
+        <span class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center ring-1 ring-gold/50 shadow-inner">
+          <i class="fas fa-users-cog text-gold"></i>
+        </span>
+        إدارة المستخدمين والصلاحيات
+      </a>
+
+      <div class="flex items-center gap-3 flex-wrap">
+        <span class="text-slate-100 text-sm">مرحباً، <strong class="text-gold">{{ session.get('user_name', 'المشرف') }}</strong></span>
+
+        <a href="{{ url_for('admin.admin_requests') }}"
+           class="inline-flex items-center gap-1.5 rounded-lg border border-white/30 text-white hover:bg-white/10 text-xs font-bold px-3.5 py-2 transition-colors">
+          <i class="fas fa-arrow-right"></i> العودة لوحة التحكم
+        </a>
+
+        <a href="{{ url_for('auth.logout') }}"
+           class="inline-flex items-center gap-1.5 rounded-lg border border-white/30 text-white hover:bg-white/10 text-xs font-bold px-3.5 py-2 transition-colors">
+          <i class="fas fa-sign-out-alt"></i> خروج
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- المحتوى الرئيسي -->
+  <div class="flex-1 overflow-y-auto overflow-x-hidden px-4 sm:px-6 py-4">
+
+    <!-- التنبيهات -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="mb-3 flex items-start justify-between gap-3 rounded-xl border px-4 py-3 text-sm shadow-sm glass-card
+                      {% if category == 'danger' %} border-red-300 text-red-800 bg-red-50/90
+                      {% elif category == 'success' %} border-emerald-300 text-emerald-800 bg-emerald-50/90
+                      {% elif category == 'warning' %} border-amber-300 text-amber-800 bg-amber-50/90
+                      {% else %} border-sky-300 text-sky-800 bg-sky-50/90 {% endif %}"
+               role="alert" id="flash-{{ loop.index }}">
+            <span class="flex items-center gap-2"><i class="fas fa-info-circle"></i> {{ message }}</span>
+            <button type="button" onclick="document.getElementById('flash-{{ loop.index }}').remove()"
+                    class="text-lg leading-none opacity-60 hover:opacity-100">&times;</button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <!-- شريط الإجراءات العلوي للجدول -->
+    <div class="rounded-2xl glass-card shadow-glass mb-4 p-4 flex items-center justify-between flex-wrap gap-3">
+      <div>
+        <h2 class="text-sm font-extrabold text-navy-dark flex items-center gap-2">
+          <i class="fas fa-user-shield text-gold"></i> قائمة المستخدمين المسجلين في النظام
+        </h2>
+        <p class="text-xs text-slate-500 mt-0.5">عرض وتعديل وحذف مستخدمي النظام والتحكم بصلاحياتهم</p>
+      </div>
+      <div>
+        <a href="{{ url_for('admin.admin_add_user') }}"
+           class="inline-flex items-center gap-1.5 rounded-lg bg-teal hover:bg-teal-dark text-white text-xs font-bold px-4 py-2.5 shadow-sm transition-colors">
+          <i class="fas fa-user-plus"></i> إضافة مستخدم جديد
+        </a>
+      </div>
+    </div>
+
+    <!-- جدول المستخدمين -->
+    <div class="rounded-2xl glass-card shadow-glass flex flex-col" style="height: calc(100vh - 220px);" id="tableCardWrapper">
+      <div class="table-scroll-wrapper overflow-auto flex-1">
+        <table class="w-full text-xs sm:text-sm">
+          <thead>
+            <tr>
+              <th class="sticky top-0 z-10 bg-navy-dark text-white font-bold px-4 py-3 text-right shadow-[inset_0_-2px_0_0_#C9A227] w-16">#</th>
+              <th class="sticky top-0 z-10 bg-navy-dark text-white font-bold px-4 py-3 text-right shadow-[inset_0_-2px_0_0_#C9A227]">الاسم الكامل</th>
+              <th class="sticky top-0 z-10 bg-navy-dark text-white font-bold px-4 py-3 text-right shadow-[inset_0_-2px_0_0_#C9A227]">البريد الإلكتروني</th>
+              <th class="sticky top-0 z-10 bg-navy-dark text-white font-bold px-4 py-3 text-right shadow-[inset_0_-2px_0_0_#C9A227]">الدور / الصلاحية</th>
+              <th class="sticky top-0 z-10 bg-navy-dark text-white font-bold px-4 py-3 text-center shadow-[inset_0_-2px_0_0_#C9A227] w-40">الإجراءات</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200/60">
+            {% if users %}
+              {% for u in users %}
+              <tr class="odd:bg-white/70 even:bg-white/30 hover:bg-teal/15 transition-colors">
+                <td class="px-4 py-3 font-extrabold text-navy-dark">{{ loop.index }}</td>
+                <td class="px-4 py-3 font-semibold text-slate-800">{{ u.full_name }}</td>
+                <td class="px-4 py-3 text-slate-600 font-mono" dir="ltr">{{ u.email }}</td>
+                <td class="px-4 py-3">
+                  <span class="inline-flex items-center rounded-full bg-sky-100 text-sky-800 ring-1 ring-sky-300 text-xs font-bold px-3 py-1">
+                    {% if u.role == 'system_admin' %}مدير النظام العام
+                    {% elif u.role == 'request_processor' %}معالج الطلبات
+                    {% elif u.role == 'observer' %}مراقب (قراءة فقط)
+                    {% else %}{{ role_mapping.get(u.role, u.role) }}
+                    {% endif %}
+                  </span>
+                </td>
+                <td class="px-4 py-3 text-center">
+                  <div class="flex items-center justify-center gap-1.5 flex-wrap">
+                    <a href="{{ url_for('admin.admin_edit_user', user_id=u.id) }}" title="تعديل المستخدم"
+                       class="inline-flex items-center gap-1 rounded-lg border border-amber-400 text-amber-700 hover:bg-amber-600 hover:text-white text-xs font-bold px-2.5 py-1.5 transition-colors bg-white/90 shadow-sm">
+                      <i class="fas fa-edit"></i> تعديل
+                    </a>
+                    {% if u.id != session.get('user_id') %}
+                    <form action="{{ url_for('admin.admin_delete_user', user_id=u.id) }}" method="POST" class="inline"
+                          onsubmit="return confirm('هل أنت متأكد من حذف المستخدم {{ u.full_name }} نهائياً؟');">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <button type="submit" title="حذف المستخدم"
+                              class="inline-flex items-center justify-center rounded-lg border border-red-300 text-red-600 hover:bg-red-600 hover:text-white w-8 h-[30px] transition-colors bg-white/90 shadow-sm">
+                        <i class="fas fa-trash-alt text-[11px]"></i>
+                      </button>
+                    </form>
+                    {% endif %}
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            {% else %}
+              <tr>
+                <td colspan="5" class="text-center py-16 text-slate-500">
+                  <i class="fas fa-users-slash text-5xl mb-3 block text-slate-400"></i>
+                  لا يوجد مستخدمون مسجلون حالياً في النظام.
+                </td>
+              </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function resizeTable() {
+    const card = document.getElementById('tableCardWrapper');
+    if (!card) return;
+    const top = card.getBoundingClientRect().top;
+    const bottomMargin = 16;
+    const available = window.innerHeight - top - bottomMargin;
+    card.style.height = Math.max(available, 300) + 'px';
+  }
+  window.addEventListener('load', resizeTable);
+  window.addEventListener('resize', resizeTable);
+  document.addEventListener('DOMContentLoaded', resizeTable);
+</script>
+</body>
+</html>

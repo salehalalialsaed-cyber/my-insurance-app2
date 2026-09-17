@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إضافة طلب منفذ سابقاً - لوحة تحكم الإدارة</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+          integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+          crossorigin="anonymous" referrerpolicy="no-referrer">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: { cairo: ['Cairo', 'Segoe UI', 'Tahoma', 'sans-serif'] },
+            colors: {
+              navy: { dark: '#125A78', mid: '#0d435b', 950: '#081f33' },
+              teal: { DEFAULT: '#28A3CC', dark: '#1e83a4', light: '#e8f7fb' },
+              gold: { DEFAULT: '#C9A227', light: '#E4C874', dark: '#a0801d' },
+            },
+            boxShadow: {
+              glass: '0 8px 32px 0 rgba(18, 90, 120, 0.15)',
+            }
+          }
+        }
+      };
+    </script>
+    <style>
+      html, body { height: 100%; margin: 0; }
+      body { 
+        font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif; 
+        background: linear-gradient(135deg, #28A3CC 0%, #125A78 100%);
+        background-attachment: fixed;
+        overflow-x: hidden; 
+      }
+      .glass-card {
+        background: rgba(255, 255, 255, 0.90);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+      }
+      .glass-nav {
+        background: rgba(18, 90, 120, 0.85);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-bottom: 2px solid #C9A227;
+      }
+    </style>
+</head>
+<body class="font-cairo text-slate-700">
+
+    <div class="min-h-screen flex flex-col">
+
+        <!-- الهيدر العلوي الموحد -->
+        <nav class="shrink-0 glass-nav shadow-lg text-white sticky top-0 z-50">
+            <div class="px-4 sm:px-6 py-3 flex items-center justify-between flex-wrap gap-3">
+                <div class="flex items-center gap-2 font-extrabold text-lg text-white">
+                    <span class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center ring-1 ring-gold/50 shadow-inner">
+                        <i class="fas fa-user-shield text-gold"></i>
+                    </span>
+                    لوحة تحكم الإدارة
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="text-xs bg-white/10 px-3 py-1.5 rounded-lg border border-white/20">
+                        مرحباً، <strong>{{ session.get('user_name', 'المشرف') }}</strong>
+                    </span>
+                    <a href="{{ url_for('auth.logout') }}"
+                       class="inline-flex items-center gap-1.5 rounded-lg border border-white/30 text-white hover:bg-red-500/80 text-xs font-bold px-3.5 py-2 transition-colors">
+                        <i class="fas fa-sign-out-alt"></i> خروج
+                    </a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- المحتوى الرئيسي -->
+        <div class="flex-1 px-4 sm:px-6 py-6 max-w-5xl mx-auto w-full">
+
+            <!-- رسائل الفلاش (التنبيهات) -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="mb-4 flex items-center justify-between gap-3 rounded-xl border px-4 py-3 text-sm shadow-sm glass-card
+                                    {% if category == 'danger' or category == 'error' %} border-red-300 text-red-800 bg-red-50/90
+                                    {% elif category == 'success' %} border-emerald-300 text-emerald-800 bg-emerald-50/90
+                                    {% else %} border-sky-300 text-sky-800 bg-sky-50/90 {% endif %}"
+                             role="alert">
+                            <span class="flex items-center gap-2"><i class="fas fa-info-circle"></i> {{ message }}</span>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- شريط العنوان والرجوع -->
+            <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
+                <h1 class="text-xl font-extrabold text-white flex items-center gap-2 drop-shadow-md">
+                    <i class="fas fa-plus-circle text-gold"></i> إضافة طلب منفذ سابقاً
+                </h1>
+                <a href="{{ url_for('admin.admin_requests') }}"
+                   class="inline-flex items-center gap-1.5 rounded-xl bg-white/20 hover:bg-white/30 text-white text-xs font-bold px-4 py-2.5 backdrop-blur-md border border-white/30 shadow-md transition-all">
+                    <i class="fas fa-arrow-right"></i> رجوع لقائمة الطلبات
+                </a>
+            </div>
+
+            <!-- نموذج الإضافة داخل كارت زجاجي متناسق -->
+            <div class="rounded-3xl glass-card shadow-glass p-6 sm:p-8 mb-8">
+                <form method="POST" class="space-y-6">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                    <!-- القسم الأول: مقدم الطلب والشريحة -->
+                    <div>
+                        <h2 class="text-xs font-extrabold text-navy-dark uppercase tracking-wider mb-3 flex items-center gap-2 border-b border-slate-200 pb-2">
+                            <i class="fas fa-user text-gold"></i> مقدم الطلب والشريحة
+                        </h2>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1.5">مقدم الطلب *</label>
+                            <select name="applicant_id" required
+                                    class="w-full rounded-xl border border-slate-300 bg-white/90 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gold shadow-sm">
+                                <option value="" disabled selected>اختر مقدم الطلب...</option>
+                                {% for a in applicants %}
+                                    <option value="{{ a.id }}">{{ a.full_name }} — {{ a.email }} ({{ a.role }})</option>
+                                {% endfor %}
+                            </select>
+                            <p class="text-[11px] text-slate-500 mt-1">تُحدَّد الشريحة تلقائياً حسب دور مقدم الطلب المختار.</p>
+                        </div>
+                    </div>
+
+                    <!-- القسم الثاني: نطاق الجهة والبرنامج -->
+                    <div>
+                        <h2 class="text-xs font-extrabold text-navy-dark uppercase tracking-wider mb-3 flex items-center gap-2 border-b border-slate-200 pb-2">
+                            <i class="fas fa-map-marker-alt text-gold"></i> نطاق الجهة والبرنامج
+                        </h2>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">المحافظة *</label>
+                                <select name="governorate" required
+                                        class="w-full rounded-xl border border-slate-300 bg-white/90 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gold shadow-sm">
+                                    <option value="" disabled selected>اختر المحافظة...</option>
+                                    {% for gov in governorates %}
+                                        <option value="{{ gov.name }}">{{ gov.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">المجموعة التدريبية *</label>
+                                <input type="text" name="group_name" required placeholder="اسم المجموعة التدريبية"
+                                       class="w-full rounded-xl border border-slate-300 bg-white/90 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gold shadow-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">الحقيبة التدريبية *</label>
+                                <select name="course_title" required
+                                        class="w-full rounded-xl border border-slate-300 bg-white/90 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gold shadow-sm">
+                                    <option value="" disabled selected>اختر الحقيبة...</option>
+                                    {% for c in courses %}
+                                        <option value="{{ c.title }}">{{ c.title }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- القسم الثالث: التوقيت والمدة -->
+                    <div>
+                        <h2 class="text-xs font-extrabold text-navy-dark uppercase tracking-wider mb-3 flex items-center gap-2 border-b border-slate-200 pb-2">
+                            <i class="fas fa-calendar-alt text-gold"></i> التوقيت والمدة
+                        </h2>
+                        <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">تاريخ البداية *</label>
+                                <input type="date" name="start_date" required
+                                       class="w-full rounded-xl border border-slate-300 bg-white/90 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gold shadow-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">تاريخ النهاية *</label>
+                                <input type="date" name="end_date" required
+                                       class="w-full rounded-xl border border-slate-300 bg-white/90 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gold shadow-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">عدد الأيام التدريبية *</label>
+                                <input type="number" min="0" name="days_count" required placeholder="مثال: 5"
+                                       class="w-full rounded-xl border border-slate-300 bg-white/90 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gold shadow-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">إجمالي عدد الساعات *</label>
+                                <input type="number" min="0" name="hours_count" required placeholder="مثال: 20"
+                                       class="w-full rounded-xl border border-slate-300 bg-white/90 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gold shadow-sm">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- القسم الرابع: حالة التنفيذ وبيانات المدرب -->
+                    <div>
+                        <h2 class="text-xs font-extrabold text-navy-dark uppercase tracking-wider mb-3 flex items-center gap-2 border-b border-slate-200 pb-2">
+                            <i class="fas fa-chalkboard-teacher text-gold"></i> حالة التنفيذ وبيانات المدرب
+                        </h2>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">حالة الطلب *</label>
+                                <select name="status" required
+                                        class="w-full rounded-xl border border-slate-300 bg-white/90 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gold shadow-sm">
+                                    {% for st in valid_statuses %}
+                                        <option value="{{ st }}">{{ st }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">اسم المدرب</label>
+                                <input type="text" name="trainer_name" placeholder="اسم المدرب (إن وجد)"
+                                       class="w-full rounded-xl border border-slate-300 bg-white/90 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gold shadow-sm">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">رقم هاتف المدرب</label>
+                                <input type="text" name="trainer_phone" placeholder="05xxxxxxx"
+                                       class="w-full rounded-xl border border-slate-300 bg-white/90 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gold shadow-sm">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">الأجر بالساعة (USD)</label>
+                                <input type="number" step="0.01" min="0" name="hourly_rate_usd" placeholder="مثال: 20"
+                                       class="w-full rounded-xl border border-slate-300 bg-white/90 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gold shadow-sm">
+                            </div>
+                            <div class="sm:col-span-2">
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">ملاحظات</label>
+                                <input type="text" name="trainer_notes" placeholder="أي ملاحظات إضافية"
+                                       class="w-full rounded-xl border border-slate-300 bg-white/90 px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gold shadow-sm">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- أزرار الإجراءات -->
+                    <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-200">
+                        <a href="{{ url_for('admin.admin_requests') }}"
+                           class="rounded-xl border border-slate-300 bg-slate-100 hover:bg-slate-200 text-slate-700 px-5 py-2.5 text-xs font-bold transition-colors">
+                            إلغاء
+                        </a>
+                        <button type="submit"
+                                class="rounded-xl bg-gold hover:bg-gold-dark text-navy-950 px-6 py-2.5 text-xs font-extrabold shadow-md transition-all flex items-center gap-2">
+                            <i class="fas fa-save"></i> حفظ الطلب
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

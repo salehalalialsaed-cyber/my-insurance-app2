@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مصفوفة التوزيع التدريبي - {{ locked_segment_name }}</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: { cairo: ['Cairo', 'Segoe UI', 'Tahoma', 'sans-serif'] },
+            colors: {
+              navy: { dark: '#125A78', mid: '#0d435b', 950: '#081f33' },
+              teal: { DEFAULT: '#28A3CC', dark: '#1e83a4', light: '#e8f7fb' },
+              gold: { DEFAULT: '#C9A227', light: '#E4C874', dark: '#a0801d' }
+            },
+            boxShadow: {
+              glass: '0 8px 32px 0 rgba(18, 90, 120, 0.15)',
+            }
+          }
+        }
+      };
+    </script>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            overflow: hidden;
+        }
+        body {
+            font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
+            background: linear-gradient(135deg, #28A3CC 0%, #125A78 100%);
+            background-attachment: fixed;
+            display: flex;
+            flex-direction: column;
+            color: #2E5A70;
+            padding: 12px 20px;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        .glass-nav {
+            background: rgba(18, 90, 120, 0.9);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 2px solid #C9A227;
+        }
+
+        .scroll-proxy {
+            overflow-x: auto;
+            overflow-y: hidden;
+            height: 12px;
+            margin-bottom: 4px;
+        }
+        .scroll-proxy div {
+            height: 1px;
+        }
+        .matrix-scroll-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            overflow-y: auto;
+            max-height: 50vh;
+        }
+
+        ::-webkit-scrollbar { width: 8px; height: 10px; }
+        ::-webkit-scrollbar-thumb { background: #C9A227; border-radius: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.3); }
+
+        table.matrix-grid {
+            width: max-content;
+            min-width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            white-space: nowrap;
+        }
+        table.matrix-grid th, table.matrix-grid td {
+            border: 1px solid rgba(203, 213, 225, 0.8);
+            padding: 10px 14px;
+            text-align: center;
+            vertical-align: middle;
+        }
+        table.matrix-grid th.header-dark {
+            background-color: #125A78;
+            color: white;
+            font-weight: 700;
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            box-shadow: inset 0 -2px 0 0 #C9A227;
+        }
+
+        .cell-content {
+            font-size: 0.85rem;
+            min-width: 170px;
+            max-width: 220px;
+            white-space: normal;
+            word-wrap: break-word;
+            padding: 10px !important;
+        }
+
+        .status-new { background-color: #fef9c3 !important; color: #854d0e !important; font-weight: 700; border-color: #facc15 !important; }
+        .status-processing { background-color: #ffedd5 !important; color: #9a3412 !important; font-weight: 700; border-color: #fb923c !important; }
+        .status-contracted { background-color: #dbeafe !important; color: #1e40af !important; font-weight: 700; border-color: #60a5fa !important; }
+        .status-executing { background-color: #d1fae5 !important; color: #065f46 !important; font-weight: 700; border-color: #34d399 !important; }
+        .status-completed { background-color: #166534 !important; color: #ffffff !important; font-weight: 700; border-color: #14532d !important; }
+        .empty-cell { color: #94a3b8; font-style: italic; font-size: 0.8rem; background-color: rgba(255, 255, 255, 0.5); }
+
+        .main-container {
+            width: 100%;
+            max-width: 98%;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+        }
+    </style>
+</head>
+<body class="font-cairo text-slate-700">
+
+<div class="main-container">
+
+    <!-- النافبار العلوي -->
+    <nav class="glass-nav shadow-lg text-white mb-3 rounded-2xl px-6 py-2.5 flex items-center justify-between flex-wrap gap-3 flex-shrink-0">
+        <a class="flex items-center gap-2 font-extrabold text-lg text-white" href="#">
+            <span class="w-9 h-9 rounded-xl bg-white/10 flex items-center justify-center ring-1 ring-gold/50 shadow-inner">
+                <i class="fa-solid fa-table-cells text-gold"></i>
+            </span>
+            مصفوفة التوزيع - {{ locked_segment_name }}
+        </a>
+        <div class="flex items-center gap-3 flex-wrap text-sm">
+            <a href="{{ url_for('applicant.applicant_test_links') }}" class="inline-flex items-center gap-1.5 rounded-lg bg-teal/25 hover:bg-teal/40 text-white text-xs font-bold px-3 py-1.5 border border-teal/40 transition-all">
+                <i class="fa-solid fa-link me-1"></i> تتبع اختباراتي
+            </a>
+            <a href="{{ url_for('applicant.my_requests') }}" class="inline-flex items-center gap-1.5 rounded-lg bg-white/15 hover:bg-white/25 text-white text-xs font-bold px-3 py-1.5 transition-all">
+                <i class="fa-solid fa-list-check me-1"></i> سجل طلباتي
+            </a>
+            <a href="{{ url_for('applicant.request_form') }}" class="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-gold-light to-gold text-slate-900 text-xs font-bold px-3 py-1.5 shadow-sm transition-all hover:brightness-105">
+                <i class="fa-solid fa-plus me-1"></i> تقديم طلب جديد
+            </a>
+            <span class="text-slate-100 border-r border-white/20 pe-3"><i class="fa-solid fa-user-circle me-1 text-gold"></i> <strong class="text-white">{{ session.get('user_name') }}</strong></span>
+            <a href="{{ url_for('auth.logout') }}" class="inline-flex items-center gap-1.5 rounded-lg border border-red-400 text-red-200 hover:bg-red-600 hover:text-white text-xs font-bold px-3 py-1.5 transition-colors" title="خروج">
+                <i class="fa-solid fa-right-from-bracket"></i>
+            </a>
+        </div>
+    </nav>
+
+    <!-- بطاقات المؤشرات (KPIs) -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 mb-3 flex-shrink-0">
+        <div class="glass-card rounded-2xl p-3.5 shadow-glass border-b-4 border-blue-500 flex items-center justify-between">
+            <div>
+                <div class="text-xs font-bold text-slate-500">إجمالي الطلبات</div>
+                <div class="text-2xl font-extrabold text-navy-dark mt-0.5">{{ kpis.total }}</div>
+            </div>
+            <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center text-lg"><i class="fa-solid fa-layer-group"></i></div>
+        </div>
+        <div class="glass-card rounded-2xl p-3.5 shadow-glass border-b-4 border-amber-500 flex items-center justify-between">
+            <div>
+                <div class="text-xs font-bold text-slate-500">طلبات جديدة / معالجة</div>
+                <div class="text-2xl font-extrabold text-navy-dark mt-0.5">{{ kpis.new + kpis.in_progress }}</div>
+            </div>
+            <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center text-lg"><i class="fa-solid fa-clock-rotate-left"></i></div>
+        </div>
+        <div class="glass-card rounded-2xl p-3.5 shadow-glass border-b-4 border-emerald-500 flex items-center justify-between">
+            <div>
+                <div class="text-xs font-bold text-slate-500">منتهية / متعاقد عليها</div>
+                <div class="text-2xl font-extrabold text-navy-dark mt-0.5">{{ kpis.contracted + kpis.completed }}</div>
+            </div>
+            <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-lg"><i class="fa-solid fa-circle-check"></i></div>
+        </div>
+        <div class="glass-card rounded-2xl p-3.5 shadow-glass border-b-4 border-red-500 flex items-center justify-between">
+            <div>
+                <div class="text-xs font-bold text-slate-500">تعذر التنفيذ</div>
+                <div class="text-2xl font-extrabold text-navy-dark mt-0.5">{{ kpis.failed }}</div>
+            </div>
+            <div class="w-10 h-10 rounded-xl bg-red-100 text-red-600 flex items-center justify-center text-lg"><i class="fa-solid fa-triangle-exclamation"></i></div>
+        </div>
+    </div>
+
+    <!-- شريط الفلاتر -->
+    <div class="glass-card p-3 rounded-2xl shadow-glass mb-3 flex flex-wrap items-center justify-between gap-3 flex-shrink-0">
+        <form method="GET" action="{{ url_for('applicant.applicant_matrix') }}" class="flex items-center gap-3 w-full sm:w-auto">
+            <label class="font-bold text-slate-700 text-sm flex items-center gap-2">
+                <i class="fa-solid fa-map-location-dot text-gold text-lg"></i> اختر المحافظة:
+            </label>
+            <select name="governorate_code" class="rounded-xl border border-slate-300 bg-white px-4 py-1.5 text-sm font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-gold shadow-sm" onchange="this.form.submit()">
+                {% for gov in governorates %}
+                <option value="{{ gov.code }}" {% if sel_gov_code == gov.code %}selected{% endif %}>{{ gov.name }}</option>
+                {% endfor %}
+            </select>
+        </form>
+        <div class="text-xs font-bold text-slate-600 bg-white/70 px-3.5 py-1.5 rounded-xl border border-slate-200 flex items-center gap-2">
+            <i class="fa-solid fa-lock text-gold"></i> شريحتك مقفلة تلقائياً على: <strong class="text-navy-dark">{{ locked_segment_name }}</strong>
+        </div>
+    </div>
+
+    <!-- جدول المصفوفة الرئيسي -->
+    <div class="glass-card rounded-2xl shadow-glass p-3 mb-2 flex flex-col flex-1 min-h-0">
+        <!-- شريط التمرير العلوي المتزامن -->
+        <div id="topScrollWrapper" class="scroll-proxy flex-shrink-0">
+            <div id="topScrollContent"></div>
+        </div>
+
+        <div id="mainTableWrapper" class="matrix-scroll-wrapper flex-1">
+            <table class="matrix-grid text-sm">
+                <thead>
+                    <tr>
+                        <th class="header-dark" style="width: 50px;">م</th>
+                        <th class="header-dark">كود الحقيبة</th>
+                        <th class="header-dark">المسار</th>
+                        <th class="header-dark">المستوى</th>
+                        <th class="header-dark" style="min-width: 220px;">عنوان الحقيبة</th>
+                        <th class="header-dark">روابط الحقائب</th>
+                        
+                        {% if groups %}
+                            {% for g in groups %}
+                                <th class="header-dark" style="min-width: 170px;">{{ g.name }}</th>
+                            {% endfor %}
+                        {% else %}
+                            <th class="header-dark">لا توجد مجموعات مسجلة لهذه المحافظة في شريحتك</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200 bg-white/70">
+                    {% for course in courses %}
+                    <tr class="hover:bg-teal/10 transition-colors">
+                        <td class="font-bold bg-slate-50 text-slate-600">{{ loop.index }}</td>
+                        <td><span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-navy-dark text-white">{{ course.code }}</span></td>
+                        <td class="text-slate-600">{{ course.track_name }}</td>
+                        <td class="text-slate-600">{{ course.level_name }}</td>
+                        <td class="text-right font-extrabold text-slate-800">{{ course.title }}</td>
+                        <td>
+                            {% if course.course_link %}
+                                <a href="{{ course.course_link }}" target="_blank" class="inline-flex items-center gap-1 rounded-lg border border-teal text-navy-dark hover:bg-teal hover:text-white text-xs font-bold px-2.5 py-1 transition-colors bg-white shadow-sm">
+                                    <i class="fa-solid fa-link"></i> رابط الحقيبة
+                                </a>
+                            {% else %}
+                                <span class="text-slate-400 text-xs">غير متوفر</span>
+                            {% endif %}
+                        </td>
+
+                        {% if groups %}
+                            {% for g in groups %}
+                                {% set key = (course.title, g.name) %}
+                                <td class="cell-content 
+                                    {% if key in matrix_data %}
+                                        {% set req = matrix_data[key] %}
+                                        {% if req.status == 'طلب جديد' %}status-new
+                                        {% elif req.status == 'جاري المعالجة' %}status-processing
+                                        {% elif 'تم التعاقد' in req.status or 'تم تنفيذ الطلب' in req.status %}status-contracted
+                                        {% elif req.status == 'جاري تنفيذ التدريب' %}status-executing
+                                        {% elif 'تم الانتهاء' in req.status %}status-completed
+                                        {% else %}status-new{% endif %}
+                                    {% else %}
+                                        empty-cell
+                                    {% endif %}">
+                                    {% if key in matrix_data %}
+                                        {% set req = matrix_data[key] %}
+                                        <div class="font-bold">{{ req.status }}</div>
+                                        <div class="text-xs font-mono mt-1 opacity-90">({{ req.request_code }})</div>
+                                        {% if req.trainer_name %}
+                                            <div class="text-xs mt-1 text-gold-dark font-semibold"><i class="fa-solid fa-user-tie me-1"></i>{{ req.trainer_name }}</div>
+                                        {% endif %}
+                                    {% else %}
+                                        <span>-</span>
+                                    {% endif %}
+                                </td>
+                            {% endfor %}
+                        {% else %}
+                            <td class="text-slate-400">-</td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const topScroll = document.getElementById('topScrollWrapper');
+    const mainScroll = document.getElementById('mainTableWrapper');
+    const topContent = document.getElementById('topScrollContent');
+    const table = mainScroll.querySelector('table');
+
+    function updateProxyWidth() {
+        topContent.style.width = table.scrollWidth + 'px';
+    }
+
+    window.addEventListener('load', updateProxyWidth);
+    window.addEventListener('resize', updateProxyWidth);
+
+    topScroll.addEventListener('scroll', function() {
+        mainScroll.scrollLeft = topScroll.scrollLeft;
+    });
+
+    mainScroll.addEventListener('scroll', function() {
+        topScroll.scrollLeft = mainScroll.scrollLeft;
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>طلب رابط اختبار | مديرية إعداد وتطوير القادة</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+          integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+          crossorigin="anonymous" referrerpolicy="no-referrer">
+    <link href="https://fonts.googleapis.com/css2?family=Markazi+Text:wght@500;600;700&family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: { cairo: ['Cairo', 'Segoe UI', 'Tahoma', 'sans-serif'], markazi: ['Markazi Text', 'serif'] },
+            colors: {
+              navy: { dark: '#125A78', mid: '#0d435b', 950: '#081f33' },
+              teal: { DEFAULT: '#28A3CC', dark: '#1e83a4', light: '#e8f7fb' },
+              gold: { DEFAULT: '#C9A227', light: '#E4C874', dark: '#a0801d' },
+            },
+            boxShadow: {
+              glass: '0 30px 70px rgba(8,50,70,.35), inset 0 1px 0 rgba(255,255,255,.6)',
+            }
+          }
+        }
+      };
+    </script>
+    <style>
+      :root{
+        --brand-cyan:#28A3CC;
+        --brand-teal:#1D8FB8;
+        --brand-blue:#1D7799;
+        --brand-blue-deep:#125A78;
+        --gold-300:#E4C874;
+        --gold-500:#C9A227;
+        --gold-line: rgba(201,162,39,.4);
+        --ink-900:#0B3A52;
+        --ink-700:#2E5A70;
+      }
+      body { 
+        font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif; 
+        background: linear-gradient(135deg, var(--brand-cyan) 0%, var(--brand-teal) 45%, var(--brand-blue) 75%, var(--brand-blue-deep) 100%);
+        background-attachment: fixed;
+        min-height: 100vh;
+        color: var(--ink-900);
+      }
+      body::before{
+        content:'';
+        position:fixed;
+        inset:0;
+        background:
+          radial-gradient(circle at 12% 8%, rgba(255,255,255,.12), transparent 40%),
+          radial-gradient(circle at 88% 92%, rgba(255,255,255,.08), transparent 45%);
+        pointer-events:none;
+      }
+      .glass-card {
+        background: linear-gradient(165deg, rgba(255,255,255,.62), rgba(255,255,255,.38));
+        backdrop-filter: blur(24px) saturate(180%);
+        -webkit-backdrop-filter: blur(24px) saturate(180%);
+        border: 1px solid rgba(255,255,255,.75);
+      }
+      .auth-corner{
+        position:absolute;
+        width:20px; height:20px;
+        border-color: var(--gold-500);
+      }
+      .auth-corner.tl{top:12px; right:12px; border-top:2px solid; border-right:2px solid; border-radius:3px 6px 0 0;}
+      .auth-corner.tr{top:12px; left:12px; border-top:2px solid; border-left:2px solid; border-radius:6px 3px 0 0;}
+      .auth-corner.bl{bottom:12px; right:12px; border-bottom:2px solid; border-right:2px solid; border-radius:0 0 3px 6px;}
+      .auth-corner.br{bottom:12px; left:12px; border-bottom:2px solid; border-left:2px solid; border-radius:0 0 6px 3px;}
+
+      .auth-emblem{
+        width:96px; height:96px;
+        margin:0 auto 18px;
+        border-radius:50%;
+        position:relative;
+        background: radial-gradient(circle at 32% 26%, var(--brand-cyan) 0%, var(--brand-teal) 55%, var(--brand-blue-deep) 100%);
+        border:2px solid var(--gold-300);
+        box-shadow: 0 0 0 5px rgba(255,255,255,.35), 0 14px 28px rgba(8,50,70,.4);
+        display:flex; align-items:center; justify-content:center;
+      }
+      .auth-emblem svg{
+        width:56%;
+        height:56%;
+        filter: drop-shadow(0 3px 6px rgba(0,0,0,.2));
+      }
+    </style>
+</head>
+<body class="font-cairo py-10 px-4 sm:px-6">
+
+<div class="w-full max-w-4xl mx-auto">
+    <div class="rounded-3xl glass-card shadow-glass overflow-hidden relative p-6 sm:p-10">
+        <!-- الزوايا الزخرفية -->
+        <span class="auth-corner tl"></span>
+        <span class="auth-corner tr"></span>
+        <span class="auth-corner bl"></span>
+        <span class="auth-corner br"></span>
+
+        <!-- زر تسجيل الخروج العلوي -->
+        <div class="flex justify-end mb-4">
+            <a href="{{ url_for('auth.logout') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-700 text-xs sm:text-sm font-bold border border-red-300/60 transition-all shadow-sm">
+                <i class="fa-solid fa-right-from-bracket"></i> تسجيل الخروج
+            </a>
+        </div>
+
+        <!-- الشعار والهيدر -->
+        <div class="text-center relative mb-8 pb-6 border-b border-amber-500/30">
+            <div class="auth-emblem">
+              <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path fill-rule="evenodd" fill="#FFFFFF" d="M 0,50 L 16.75,66.37 L 20.49,62.5 L 8.38,49.87 L 50.13,8.51 L 91.49,49.87 L 79.38,62.5 L 83.12,66.37 L 99.87,50.26 L 49.87,0 Z M 19.2,68.94 L 28.87,77.96 L 30.67,75.9 L 24.48,68.94 L 50.26,43.69 L 75.39,68.94 L 69.2,75.9 L 71.13,78.09 L 80.67,69.46 L 50,38.4 Z M 30.93,80.93 L 35.7,86.08 L 36.98,86.47 L 37.89,84.92 L 34.15,80.93 L 50,65.21 L 65.72,80.93 L 61.86,85.05 L 62.89,86.47 L 64.05,86.21 L 68.94,81.19 L 50,62.11 Z"/>
+                <path fill="var(--gold-300)" d="M 49.87,78.61 L 39.3,89.43 L 50.13,100 L 60.57,89.18 Z"/>
+              </svg>
+            </div>
+            <h1 class="font-['Markazi_Text'] font-bold text-3xl sm:text-4xl mb-1 text-slate-900 tracking-wide">طلب رابط اختبار موقّت</h1>
+            <p class="text-xs sm:text-sm text-slate-700 m-0">مديرية إعداد وتطوير القادة - نظام إدارة روابط الاختبارات</p>
+        </div>
+
+        <div>
+            <!-- رسائل الفلاش -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                {% for category, message in messages %}
+                  <div class="mb-6 flex items-center justify-between gap-3 rounded-2xl border px-5 py-4 text-sm shadow-sm bg-white/70 backdrop-blur-md
+                              {% if category == 'danger' or category == 'error' %} border-red-300 text-red-800 bg-red-50/80
+                              {% elif category == 'success' %} border-emerald-300 text-emerald-800 bg-emerald-50/80
+                              {% else %} border-sky-300 text-sky-800 bg-sky-50/80 {% endif %}"
+                       role="alert">
+                     <span class="flex items-center gap-2 font-bold"><i class="fa-solid fa-circle-info"></i> {{ message }}</span>
+                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                  </div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+
+            <!-- تنبيه إرشادي لطبيعة الرابط -->
+            <div class="mb-6 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-slate-800 text-xs sm:text-sm flex items-start gap-3">
+                <i class="fa-solid fa-triangle-exclamation text-amber-600 text-lg mt-0.5"></i>
+                <div>
+                    <strong>ملاحظة هامة:</strong> الرابط الذي سيصلك عبر البريد الإلكتروني يفتح فقط بالتاريخ والوقت المحددين، ويبقى صالحاً لمدة {{ window_duration_label }} من وقت البداية، ثم يُغلق تلقائياً.
+                </div>
+            </div>
+
+            <form method="POST" action="{{ url_for('test_links.request_test_link') }}" class="space-y-6">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <!-- القسم الأول: بيانات مقدم الطلب والشريحة -->
+                <div>
+                    <h2 class="text-sm font-extrabold text-navy-dark uppercase tracking-wider mb-4 flex items-center gap-2 border-b-2 border-amber-500/30 pb-2">
+                        <i class="fa-solid fa-user-pen text-gold text-lg"></i> بيانات الميسّر والشريحة
+                    </h2>
+                    <div class="grid grid-cols-1 gap-6">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-2">اسم مقدم الطلب الثلاثي <span class="text-red-500">*</span></label>
+                            <input type="text" name="facilitator_full_name" class="w-full rounded-xl border border-slate-300 bg-white/85 px-4 py-3 text-base font-semibold focus:outline-none focus:ring-2 focus:ring-gold shadow-sm" required
+                                   placeholder="مثال: محمد أحمد الخالدي"
+                                   value="{{ form_data.facilitator_full_name or '' }}">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-2">الشريحة <span class="text-red-500">*</span></label>
+                            <select name="segment_name" id="segment_name" class="w-full rounded-xl border border-slate-300 bg-white/85 px-4 py-3 text-base font-semibold focus:outline-none focus:ring-2 focus:ring-gold shadow-sm" required onchange="fetchGroups()">
+                                <option value="" {% if not form_data.segment_name %}selected{% endif %} disabled>اختر الشريحة</option>
+                                {% for seg in segments %}
+                                <option value="{{ seg.name }}" {% if form_data.segment_name == seg.name %}selected{% endif %}>{{ seg.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-2">المحافظة <span class="text-red-500">*</span></label>
+                            <select name="governorate_name" id="governorate_name" class="w-full rounded-xl border border-slate-300 bg-white/85 px-4 py-3 text-base font-semibold focus:outline-none focus:ring-2 focus:ring-gold shadow-sm" required onchange="fetchGroups()">
+                                <option value="" {% if not form_data.governorate_name %}selected{% endif %} disabled>اختر المحافظة</option>
+                                {% for gov in governorates %}
+                                <option value="{{ gov.name }}" {% if form_data.governorate_name == gov.name %}selected{% endif %}>{{ gov.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <label class="block text-sm font-bold text-slate-700 mb-2">المجموعة التدريبية <span class="text-red-500">*</span></label>
+                        <select name="group_name" id="group_name" class="w-full rounded-xl border border-slate-300 bg-white/85 px-4 py-3 text-base font-semibold focus:outline-none focus:ring-2 focus:ring-gold shadow-sm" required>
+                            <option value="" selected disabled>اختر الشريحة والمحافظة أولاً...</option>
+                            {% if form_data.group_name %}
+                            <option value="{{ form_data.group_name }}" selected>{{ form_data.group_name }}</option>
+                            {% endif %}
+                        </select>
+                    </div>
+                </div>
+
+                <!-- القسم الثاني: تفاصيل الاختبار والتوقيت -->
+                <div>
+                    <h2 class="text-sm font-extrabold text-navy-dark uppercase tracking-wider mb-4 flex items-center gap-2 border-b-2 border-amber-500/30 pb-2">
+                        <i class="fa-solid fa-clock-rotate-left text-gold text-lg"></i> تفاصيل الحقيبة والتوقيت الزمني
+                    </h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-2">اسم التدريب (الحقيبة التدريبية) <span class="text-red-500">*</span></label>
+                            <select name="course_code" class="w-full rounded-xl border border-slate-300 bg-white/85 px-4 py-3 text-base font-semibold focus:outline-none focus:ring-2 focus:ring-gold shadow-sm" required>
+                                <option value="" {% if not form_data.course_code %}selected{% endif %} disabled>اختر التدريب...</option>
+                                {% for course in courses %}
+                                <option value="{{ course.code }}" {% if form_data.course_code == course.code %}selected{% endif %}>{{ course.title }} ({{ course.track_name }} - {{ course.level_name }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-2">نوع الاختبار <span class="text-red-500">*</span></label>
+                            <select name="test_type" class="w-full rounded-xl border border-slate-300 bg-white/85 px-4 py-3 text-base font-semibold focus:outline-none focus:ring-2 focus:ring-gold shadow-sm" required>
+                                <option value="" {% if not form_data.test_type %}selected{% endif %} disabled>اختر نوع الاختبار...</option>
+                                <option value="pre" {% if form_data.test_type == 'pre' %}selected{% endif %}>الاختبار القبلي</option>
+                                <option value="post" {% if form_data.test_type == 'post' %}selected{% endif %}>الاختبار البعدي</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-2">تاريخ الاختبار <span class="text-red-500">*</span></label>
+                            <input type="date" name="requested_date" class="w-full rounded-xl border border-slate-300 bg-white/85 px-4 py-3 text-base font-semibold focus:outline-none focus:ring-2 focus:ring-gold shadow-sm" required
+                                   min="{{ today }}" value="{{ form_data.requested_date or '' }}">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-2">وقت بداية الاختبار <span class="text-red-500">*</span></label>
+                            <input type="time" name="start_time" class="w-full rounded-xl border border-slate-300 bg-white/85 px-4 py-3 text-base font-semibold focus:outline-none focus:ring-2 focus:ring-gold shadow-sm" required
+                                   value="{{ form_data.start_time or '' }}">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-2">عدد المتدربين المتوقع بهذه الجلسة <span class="text-red-500">*</span></label>
+                            <input type="number" name="expected_trainees_count" min="1" step="1"
+                                   class="w-full rounded-xl border border-slate-300 bg-white/85 px-4 py-3 text-base font-semibold focus:outline-none focus:ring-2 focus:ring-gold shadow-sm" required
+                                   placeholder="مثال: 15"
+                                   value="{{ form_data.expected_trainees_count or '' }}">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- زر الإرسال -->
+                <div class="pt-6 border-t-2 border-amber-500/30">
+                    <button type="submit" class="w-full rounded-xl bg-gradient-to-r from-amber-300 to-amber-500 hover:brightness-105 text-[#052E47] py-4 text-base font-extrabold shadow-lg transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-paper-plane text-lg"></i> إرسال الطلب وإصدار الرابط
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const PRESELECTED_GROUP = {{ (form_data.group_name or '') | tojson }};
+
+    function fetchGroups() {
+        const segment = document.getElementById('segment_name').value;
+        const governorate = document.getElementById('governorate_name').value;
+        const groupSelect = document.getElementById('group_name');
+
+        if (!segment || !governorate) return;
+
+        groupSelect.innerHTML = '<option value="" selected disabled>جاري جلب المجموعات المتاحة...</option>';
+
+        fetch(`/api/test_link/get_groups?segment=${encodeURIComponent(segment)}&governorate=${encodeURIComponent(governorate)}`)
+            .then(response => response.json())
+            .then(data => {
+                groupSelect.innerHTML = '<option value="" selected disabled>اختر المجموعة التدريبية...</option>';
+                if (data.groups && data.groups.length > 0) {
+                    data.groups.forEach(group => {
+                        const option = document.createElement('option');
+                        option.value = group.name;
+                        option.textContent = group.name;
+                        if (group.name === PRESELECTED_GROUP) option.selected = true;
+                        groupSelect.appendChild(option);
+                    });
+                } else {
+                    groupSelect.innerHTML = '<option value="" selected disabled>لا توجد مجموعات لهذا الاختيار</option>';
+                }
+            })
+            .catch(() => {
+                groupSelect.innerHTML = '<option value="" selected disabled>تعذر جلب المجموعات، حاول مجدداً</option>';
+            });
+    }
+</script>
+</body>
+</html>

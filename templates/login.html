@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تسجيل الدخول - دائرة البرامج التدريبية</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+      crossorigin="anonymous" referrerpolicy="no-referrer">
+<link href="https://fonts.googleapis.com/css2?family=Markazi+Text:wght@500;600;700&family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --brand-cyan:#28A3CC;
+    --brand-teal:#1D8FB8;
+    --brand-blue:#1D7799;
+    --brand-blue-deep:#125A78;
+
+    --gold-300:#E4C874;
+    --gold-500:#C9A227;
+    --gold-line: rgba(201,162,39,.4);
+
+    --ink-900:#0B3A52;
+    --ink-700:#2E5A70;
+    --ink-500:#5C808F;
+    --glass-bg: rgba(255,255,255,.62);
+    --glass-bg-soft: rgba(255,255,255,.38);
+    --glass-border: rgba(255,255,255,.75);
+  }
+
+  *{box-sizing:border-box;}
+
+  html,body{
+    margin:0;
+    height:100vh;
+    overflow:hidden;
+    background: linear-gradient(135deg, var(--brand-cyan) 0%, var(--brand-teal) 45%, var(--brand-blue) 75%, var(--brand-blue-deep) 100%);
+    font-family:'Cairo', sans-serif;
+    color: var(--ink-900);
+  }
+
+  body::before{
+    content:'';
+    position:fixed;
+    inset:0;
+    background:
+      radial-gradient(circle at 12% 8%, rgba(255,255,255,.12), transparent 40%),
+      radial-gradient(circle at 88% 92%, rgba(255,255,255,.08), transparent 45%);
+    pointer-events:none;
+  }
+
+  .auth-wrap{
+    position:relative;
+    height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 20px;
+  }
+
+  .auth-panel{
+    position:relative;
+    width:100%;
+    max-width:420px;
+    max-height:95vh;
+    overflow-y:auto;
+    background: linear-gradient(165deg, var(--glass-bg), var(--glass-bg-soft));
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border:1px solid var(--glass-border);
+    border-radius:20px;
+    padding:38px 35px 28px;
+    box-shadow: 0 30px 70px rgba(8,50,70,.35), inset 0 1px 0 rgba(255,255,255,.6);
+    animation: panelIn .65s cubic-bezier(.16,.8,.24,1) both;
+  }
+
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))){
+    .auth-panel{ background: rgba(255,255,255,.92); }
+  }
+
+  @keyframes panelIn{
+    from{opacity:0; transform:translateY(16px) scale(.98);}
+    to{opacity:1; transform:translateY(0) scale(1);}
+  }
+
+  .auth-corner{
+    position:absolute;
+    width:20px; height:20px;
+    border-color: var(--gold-500);
+    animation: cornerIn .5s ease both;
+  }
+  .auth-corner.tl{top:10px; right:10px; border-top:2px solid; border-right:2px solid; border-radius:3px 6px 0 0; animation-delay:.32s;}
+  .auth-corner.tr{top:10px; left:10px; border-top:2px solid; border-left:2px solid; border-radius:6px 3px 0 0; animation-delay:.38s;}
+  .auth-corner.bl{bottom:10px; right:10px; border-bottom:2px solid; border-right:2px solid; border-radius:0 0 3px 6px; animation-delay:.44s;}
+  .auth-corner.br{bottom:10px; left:10px; border-bottom:2px solid; border-left:2px solid; border-radius:0 0 6px 3px; animation-delay:.5s;}
+
+  @keyframes cornerIn{
+    from{opacity:0; transform:scale(.3);}
+    to{opacity:1; transform:scale(1);}
+  }
+
+  .auth-emblem{
+    width:95px; height:95px;
+    margin:0 auto 16px;
+    border-radius:50%;
+    position:relative;
+    background: radial-gradient(circle at 32% 26%, var(--brand-cyan) 0%, var(--brand-teal) 55%, var(--brand-blue-deep) 100%);
+    border:2px solid var(--gold-300);
+    box-shadow: 0 0 0 5px rgba(255,255,255,.35), 0 14px 28px rgba(8,50,70,.4);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .auth-emblem svg{
+    width:58%;
+    height:58%;
+    filter: drop-shadow(0 3px 6px rgba(0,0,0,.2));
+  }
+
+  .auth-head{ text-align:center; }
+  .auth-head h1{
+    font-family:'Markazi Text', serif;
+    font-weight:700;
+    font-size:1.9rem;
+    margin:0 0 4px;
+    color:var(--ink-900);
+    letter-spacing:.5px;
+  }
+  .auth-head p{
+    margin:0;
+    font-size:.8rem;
+    color:var(--ink-700);
+    line-height: 1.4;
+  }
+
+  .auth-divider{
+    display:flex; align-items:center; gap:12px;
+    margin:20px 0 20px;
+  }
+  .auth-divider .line{
+    flex:1; height:1px;
+    background: linear-gradient(to right, transparent, var(--gold-line), transparent);
+  }
+  .auth-diamond{
+    width:7px; height:7px;
+    background: linear-gradient(135deg, var(--gold-300), var(--gold-500));
+    transform:rotate(45deg);
+    box-shadow:0 0 8px rgba(201,162,39,.5);
+    animation: diamondIn .4s ease both;
+    animation-delay:.6s;
+    flex-shrink:0;
+  }
+  @keyframes diamondIn{
+    from{opacity:0; transform:rotate(45deg) scale(0);}
+    to{opacity:1; transform:rotate(45deg) scale(1);}
+  }
+
+  .auth-field{ margin-bottom:16px; }
+  .auth-field label{
+    display:block;
+    font-size:.78rem;
+    font-weight:600;
+    color:var(--ink-700);
+    margin-bottom:6px;
+  }
+  .auth-field .field-row{
+    position:relative;
+    display:flex;
+    align-items:center;
+  }
+  .auth-field input{
+    width:100%;
+    background: rgba(255,255,255,.55);
+    border:1px solid rgba(11,58,82,.15);
+    border-radius:10px;
+    color:var(--ink-900);
+    font-family:'Cairo', sans-serif;
+    font-size:.92rem;
+    padding:10px 14px;
+    outline:none;
+    transition: border-color .25s, box-shadow .25s, background .25s;
+  }
+  .auth-field input::placeholder{ color: rgba(11,58,82,.4); }
+  .auth-field input:focus{
+    border-color: var(--gold-500);
+    background: rgba(255,255,255,.85);
+    box-shadow: 0 0 0 3px rgba(201,162,39,.18);
+  }
+  .auth-field.has-toggle input{ padding-left:38px; }
+  .toggle-eye{
+    position:absolute; left:6px;
+    background:none; border:none;
+    color: var(--ink-500);
+    cursor:pointer;
+    font-size:.95rem;
+    padding:6px;
+    transition:color .2s;
+  }
+  .toggle-eye:hover{ color: var(--gold-500); }
+
+  .auth-row{
+    display:flex;
+    align-items:center;
+    justify-content:flex-end;
+    margin:-4px 0 18px;
+    font-size:.8rem;
+  }
+  .auth-forgot{
+    color: var(--ink-700);
+    text-decoration:none;
+    cursor:pointer;
+    border-bottom:1px dashed rgba(11,58,82,.35);
+  }
+  .auth-forgot:hover{ color: var(--gold-500); border-bottom-color: var(--gold-500); }
+
+  .auth-submit{
+    width:100%;
+    padding:12px;
+    margin-top:2px;
+    border:none;
+    border-radius:10px;
+    background: linear-gradient(135deg, var(--gold-300), var(--gold-500));
+    color:#052E47;
+    font-family:'Cairo', sans-serif;
+    font-weight:700;
+    font-size:0.95rem;
+    letter-spacing:.3px;
+    cursor:pointer;
+    box-shadow: 0 12px 24px rgba(201,162,39,.35);
+    transition: transform .25s ease, box-shadow .25s ease, filter .25s ease;
+  }
+  .auth-submit:hover{
+    transform:translateY(-2px);
+    box-shadow: 0 16px 30px rgba(201,162,39,.45);
+    filter:brightness(1.05);
+  }
+  .auth-submit:active{ transform:translateY(0); }
+  .auth-submit:focus-visible{ outline:2px solid var(--gold-500); outline-offset:3px; }
+
+  .flash-messages { margin-bottom: 16px; }
+  .alert {
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    margin-bottom: 8px;
+    text-align: center;
+  }
+  .alert-danger { background-color: rgba(220, 53, 69, 0.12); border: 1px solid rgba(220, 53, 69, 0.35); color: #a3283a; }
+  .alert-success { background-color: rgba(40, 167, 69, 0.12); border: 1px solid rgba(40, 167, 69, 0.35); color: #1e7a3d; }
+
+  .auth-footer{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+    margin-top:22px;
+    font-size:.72rem;
+    color: var(--ink-500);
+  }
+  .auth-footer a{
+    color: var(--ink-700);
+    text-decoration:none;
+  }
+  .auth-footer a:hover{ color: var(--gold-500); text-decoration:underline; }
+  .auth-footer .dot{
+    width:3px; height:3px;
+    border-radius:50%;
+    background: var(--ink-500);
+    flex-shrink:0;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation:none !important; transition:none !important; }
+  }
+
+  @media (max-width:420px){
+    .auth-panel{ padding:30px 20px 22px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="auth-wrap">
+  <div class="auth-panel">
+    <span class="auth-corner tl"></span>
+    <span class="auth-corner tr"></span>
+    <span class="auth-corner bl"></span>
+    <span class="auth-corner br"></span>
+
+    <div class="auth-emblem">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path fill-rule="evenodd" fill="#FFFFFF" d="M 0,50 L 16.75,66.37 L 20.49,62.5 L 8.38,49.87 L 50.13,8.51 L 91.49,49.87 L 79.38,62.5 L 83.12,66.37 L 99.87,50.26 L 49.87,0 Z M 19.2,68.94 L 28.87,77.96 L 30.67,75.9 L 24.48,68.94 L 50.26,43.69 L 75.39,68.94 L 69.2,75.9 L 71.13,78.09 L 80.67,69.46 L 50,38.4 Z M 30.93,80.93 L 35.7,86.08 L 36.98,86.47 L 37.89,84.92 L 34.15,80.93 L 50,65.21 L 65.72,80.93 L 61.86,85.05 L 62.89,86.47 L 64.05,86.21 L 68.94,81.19 L 50,62.11 Z"/>
+        <path fill="var(--gold-300)" d="M 49.87,78.61 L 39.3,89.43 L 50.13,100 L 60.57,89.18 Z"/>
+      </svg>
+    </div>
+
+    <div class="auth-head">
+      <h1>تسجيل الدخول</h1>
+      <p>دائرة البرامج التدريبية - مكتب التدريب المهاري</p>
+    </div>
+
+    <div class="auth-divider">
+      <span class="line"></span>
+      <span class="auth-diamond"></span>
+      <span class="line"></span>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-messages">
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('auth.login') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="auth-field">
+        <label for="email">البريد الإلكتروني</label>
+        <div class="field-row">
+          <input type="email" id="email" name="email" placeholder="example@domain.com" required autofocus>
+        </div>
+      </div>
+
+      <div class="auth-field has-toggle">
+        <label for="password">كلمة المرور</label>
+        <div class="field-row">
+          <input type="password" id="password" name="password" placeholder="أدخل كلمة المرور" required>
+          <button type="button" class="toggle-eye" id="togglePassword" title="عرض/إخفاء كلمة المرور">
+            <i class="fas fa-eye" id="toggleIcon"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="auth-row">
+        <a href="{{ url_for('auth.forgot_password_request') }}" class="auth-forgot" style="cursor:pointer;">نسيت كلمة المرور؟</a>
+      </div>
+
+      <button type="submit" class="auth-submit">دخول النظام</button>
+    </form>
+
+    <div class="auth-footer">
+      <a href="#">سياسة الخصوصية</a>
+      <span class="dot"></span>
+      <a href="#">شروط الاستخدام</a>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const togglePassword = document.querySelector('#togglePassword');
+  const password = document.querySelector('#password');
+  const toggleIcon = document.querySelector('#toggleIcon');
+  if (togglePassword && password && toggleIcon) {
+    togglePassword.addEventListener('click', function () {
+      const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+      password.setAttribute('type', type);
+      toggleIcon.classList.toggle('fa-eye');
+      toggleIcon.classList.toggle('fa-eye-slash');
+    });
+  }
+});
+</script>
+</body>
+</html>

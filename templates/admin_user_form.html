@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% if edit_user %}تعديل مستخدم{% else %}إضافة مستخدم جديد{% endif %}</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: { cairo: ['Cairo', 'Segoe UI', 'Tahoma', 'sans-serif'] },
+        colors: {
+          navy: { dark: '#125A78', mid: '#0d435b', 950: '#081f33' },
+          teal: { DEFAULT: '#28A3CC', dark: '#1e83a4', light: '#e8f7fb' },
+          gold: { DEFAULT: '#C9A227', light: '#E4C874', dark: '#a0801d' }
+        },
+        boxShadow: {
+          glass: '0 8px 32px 0 rgba(18, 90, 120, 0.15)',
+        }
+      }
+    }
+  };
+</script>
+<style>
+  html, body { height: 100%; margin: 0; }
+  body { 
+    font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif; 
+    background: linear-gradient(135deg, #28A3CC 0%, #125A78 100%);
+    background-attachment: fixed;
+  }
+  .glass-card {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+  }
+  .glass-nav {
+    background: rgba(18, 90, 120, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 2px solid #C9A227;
+  }
+</style>
+</head>
+<body class="font-cairo text-slate-700 flex flex-col h-screen overflow-hidden">
+
+  <!-- الهيدر العلوي -->
+  <nav class="shrink-0 glass-nav shadow-lg text-white">
+    <div class="px-4 sm:px-6 py-3 flex items-center justify-between">
+      <a href="{{ url_for('admin.admin_users') }}" class="flex items-center gap-2 font-extrabold text-lg text-white">
+        <span class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center ring-1 ring-gold/50 shadow-inner">
+          <i class="fas fa-user-cog text-gold"></i>
+        </span>
+        {% if edit_user %}تعديل بيانات المستخدم{% else %}إضافة مستخدم جديد{% endif %}
+      </a>
+      <a href="{{ url_for('admin.admin_users') }}" class="inline-flex items-center gap-1.5 rounded-lg border border-white/30 text-white hover:bg-white/10 text-xs font-bold px-3.5 py-2 transition-colors">
+        <i class="fas fa-arrow-right"></i> العودة لإدارة المستخدمين
+      </a>
+    </div>
+  </nav>
+
+  <!-- المحتوى -->
+  <div class="flex-1 overflow-y-auto px-4 sm:px-6 py-6 flex items-center justify-center">
+    <div class="w-full max-w-lg rounded-2xl glass-card shadow-glass p-6 sm:p-8">
+      
+      <h2 class="text-base font-extrabold text-navy-dark mb-5 flex items-center gap-2 border-b border-slate-200 pb-3">
+        <i class="fas fa-{% if edit_user %}user-pen{% else %}user-plus{% endif %} text-gold"></i>
+        {% if edit_user %}تعديل المستخدم: {{ edit_user.full_name }}{% else %}إدخال بيانات المستخدم الجديد{% endif %}
+      </h2>
+
+      <form method="POST" class="space-y-4">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">الاسم الكامل</label>
+          <input type="text" name="full_name" value="{{ edit_user.full_name if edit_user else '' }}" required
+                 class="w-full rounded-lg border border-slate-300 bg-white/90 px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">البريد الإلكتروني</label>
+          <input type="email" name="email" value="{{ edit_user.email if edit_user else '' }}" required dir="ltr"
+                 class="w-full rounded-lg border border-slate-300 bg-white/90 px-3.5 py-2 text-sm text-right focus:outline-none focus:ring-2 focus:ring-gold">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">كلمة المرور {% if edit_user %}(اتركها فارغة إذا لم ترد تغييرها){% endif %}</label>
+          <input type="password" name="password" {% if not edit_user %}required{% endif %} placeholder="********"
+                 class="w-full rounded-lg border border-slate-300 bg-white/90 px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">الدور / الصلاحية (الشريحة الإدارية)</label>
+          <div class="relative">
+            <select name="role" required
+                    class="w-full rounded-lg border border-slate-300 bg-white/90 px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold">
+              <!-- الصلاحيات الإدارية العامة -->
+              <optgroup label="صلاحيات النظام الإدارية">
+                <option value="system_admin" {% if edit_user and edit_user.role == 'system_admin' %}selected{% endif %}>مدير النظام العام</option>
+                <option value="request_processor" {% if edit_user and edit_user.role == 'request_processor' %}selected{% endif %}>معالج الطلبات</option>
+                <option value="observer" {% if edit_user and edit_user.role == 'observer' %}selected{% endif %}>مراقب (قراءة فقط)</option>
+              </optgroup>
+
+              <!-- شرائح الدورات وبرامج التطوير القيادي -->
+              <optgroup label="شرائح مسارات التطوير القيادي">
+                <option value="youth_leadership" {% if edit_user and edit_user.role in ['youth_leadership', 'القيادات الشبابية'] %}selected{% endif %}>القيادات الشبابية</option>
+                <!-- في حال وجود قاموس أدوار أو شرائح أخرى قادمة من البايثون -->
+                {% if role_mapping %}
+                  {% for key, val in role_mapping.items() %}
+                    {% if key not in ['system_admin', 'request_processor', 'observer', 'youth_leadership', 'applicant_test_link_requester'] %}
+                      <option value="{{ key }}" {% if edit_user and edit_user.role == key %}selected{% endif %}>{{ val }}</option>
+                    {% endif %}
+                  {% endfor %}
+                {% endif %}
+              </optgroup>
+
+              <!-- أدوار مستقلة لا تملك شريحة (ميسّر طلب روابط الاختبار) -->
+              {% if role_mapping and role_mapping.get('applicant_test_link_requester') %}
+              <optgroup label="أدوار أخرى">
+                <option value="applicant_test_link_requester" {% if edit_user and edit_user.role == 'applicant_test_link_requester' %}selected{% endif %}>{{ role_mapping['applicant_test_link_requester'] }}</option>
+              </optgroup>
+              {% endif %}
+            </select>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-2.5 pt-4 border-t border-slate-200 mt-6">
+          <a href="{{ url_for('admin.admin_users') }}" class="rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-100 text-xs font-bold px-4 py-2 transition-colors">إلغاء</a>
+          <button type="submit" class="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-5 py-2 transition-colors shadow-sm">
+            <i class="fas fa-save"></i> {% if edit_user %}حفظ التعديلات{% else %}إضافة المستخدم{% endif %}
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Tahoma, Arial, sans-serif; direction: rtl; text-align: right; background-color: #f9f9f9; padding: 20px; color: #333; }
+        .email-container { background-color: #ffffff; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0; max-width: 600px; margin: 0 auto; direction: rtl; text-align: right; }
+        h3 { color: #0056b3; border-bottom: 2px solid #0056b3; padding-bottom: 8px; text-align: right; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        td { padding: 8px; border-bottom: 1px dashed #eee; font-size: 15px; text-align: right; }
+        .status-badge { background-color: #e7f1ff; color: #0d6efd; padding: 4px 10px; border-radius: 4px; font-weight: bold; display: inline-block; }
+        .footer { margin-top: 20px; font-size: 13px; color: #777; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <h3>مرحباً،</h3>
+        <p>تم استلام طلب تدريبي جديد في النظام بالتفاصيل التالية:</p>
+        <table>
+            <tr>
+                <td style="color: #555; width: 35%;">رقم المرجع:</td>
+                <td style="font-weight: bold;" dir="ltr">{{ req.request_code }}</td>
+            </tr>
+            <tr>
+                <td style="color: #555;">الشريحة المستهدفة:</td>
+                <td style="font-weight: bold;">{{ req.target_category }}</td>
+            </tr>
+            <tr>
+                <td style="color: #555;">المحافظة:</td>
+                <td style="font-weight: bold;">{{ req.governorate }}</td>
+            </tr>
+            <tr>
+                <td style="color: #555;">المجموعة التدريبية:</td>
+                <td style="font-weight: bold;">{{ req.group_name }}</td>
+            </tr>
+            <tr>
+                <td style="color: #555;">الحقيبة التدريبية:</td>
+                <td style="font-weight: bold;">{{ req.course_title }}</td>
+            </tr>
+            <tr>
+                <td style="color: #555;">الفترة:</td>
+                <td style="font-weight: bold;" dir="ltr">من {{ req.start_date }} إلى {{ req.end_date }}</td>
+            </tr>
+            <tr>
+                <td style="color: #555;">مدة التدريب:</td>
+                <td style="font-weight: bold;">عدد الأيام: {{ req.days_count }} | عدد الساعات: {{ req.hours_count }}</td>
+            </tr>
+            <tr>
+                <td style="color: #555;">البريد الإلكتروني لمقدم الطلب:</td>
+                <td style="font-weight: bold;" dir="ltr">{{ req.applicant_email }}</td>
+            </tr>
+            <tr>
+                <td style="color: #555;">الحالة الحالية:</td>
+                <td><span class="status-badge">{{ req.status }}</span></td>
+            </tr>
+        </table>
+        <p style="margin-top: 15px;">يمكنكم الدخول إلى لوحة التحكم الإدارية لمتابعة ومعالجة الطلب.</p>
+        <div class="footer">مع تحيات نظام إدارة التدريب</div>
+    </div>
+</body>
+</html>

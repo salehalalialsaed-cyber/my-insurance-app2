@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Tahoma, Arial, sans-serif; direction: rtl; text-align: right; background-color: #f9f9f9; padding: 20px; color: #333; }
+        .email-container { background-color: #ffffff; padding: 20px; border-radius: 8px; border: 1px solid #e0e0e0; max-width: 600px; margin: 0 auto; direction: rtl; text-align: right; }
+        h3 { color: #a94442; border-bottom: 2px solid #a94442; padding-bottom: 8px; text-align: right; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        td { padding: 8px; border-bottom: 1px dashed #eee; font-size: 15px; text-align: right; }
+        .footer { margin-top: 20px; font-size: 13px; color: #777; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <h3>تعذر إصدار رابط الاختبار</h3>
+        <p>تم توثيق طلبكم، لكن لا يوجد حالياً رابط اختبار مسجّل لهذه الحقيبة التدريبية:</p>
+        <table>
+            <tr>
+                <td style="color: #555; width: 35%;">مقدّم الطلب:</td>
+                <td style="font-weight: bold;">{{ link_req.facilitator_full_name }}</td>
+            </tr>
+            <tr>
+                <td style="color: #555;">المجموعة التدريبية:</td>
+                <td style="font-weight: bold;">{{ link_req.group_name }}</td>
+            </tr>
+            <tr>
+                <td style="color: #555; width: 35%;">الحقيبة التدريبية:</td>
+                <td style="font-weight: bold;">{{ course.title }}</td>
+            </tr>
+            <tr>
+                <td style="color: #555;">نوع الاختبار المطلوب:</td>
+                <td style="font-weight: bold;">{{ 'الاختبار القبلي' if link_req.test_type == 'pre' else 'الاختبار البعدي' }}</td>
+            </tr>
+        </table>
+        <p style="margin-top: 15px;">يرجى التواصل مع دائرة البرامج التدريبية لاستكمال الإجراء.</p>
+        <div class="footer">مع تحيات نظام إدارة التدريب</div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>طلب تأمين مدرب | مديرية إعداد وتطوير القادة</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+          integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+          crossorigin="anonymous" referrerpolicy="no-referrer">
+    <link href="https://fonts.googleapis.com/css2?family=Markazi+Text:wght@500;600;700&family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: { cairo: ['Cairo', 'Segoe UI', 'Tahoma', 'sans-serif'], markazi: ['Markazi Text', 'serif'] },
+            colors: {
+              navy: { dark: '#125A78', mid: '#0d435b', 950: '#081f33' },
+              teal: { DEFAULT: '#28A3CC', dark: '#1e83a4', light: '#e8f7fb' },
+              gold: { DEFAULT: '#C9A227', light: '#E4C874', dark: '#a0801d' },
+            },
+            boxShadow: {
+              glass: '0 30px 70px rgba(8,50,70,.35), inset 0 1px 0 rgba(255,255,255,.6)',
+            }
+          }
+        }
+      };
+    </script>
+    <style>
+      :root{
+        --brand-cyan:#28A3CC;
+        --brand-teal:#1D8FB8;
+        --brand-blue:#1D7799;
+        --brand-blue-deep:#125A78;
+        --gold-300:#E4C874;
+        --gold-500:#C9A227;
+        --gold-line: rgba(201,162,39,.4);
+        --ink-900:#0B3A52;
+        --ink-700:#2E5A70;
+      }
+      body { 
+        font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif; 
+        background: linear-gradient(135deg, var(--brand-cyan) 0%, var(--brand-teal) 45%, var(--brand-blue) 75%, var(--brand-blue-deep) 100%);
+        background-attachment: fixed;
+        min-height: 100vh;
+        color: var(--ink-900);
+      }
+      body::before{
+        content:'';
+        position:fixed;
+        inset:0;
+        background:
+          radial-gradient(circle at 12% 8%, rgba(255,255,255,.12), transparent 40%),
+          radial-gradient(circle at 88% 92%, rgba(255,255,255,.08), transparent 45%);
+        pointer-events:none;
+      }
+      .glass-card {
+        background: linear-gradient(165deg, rgba(255,255,255,.62), rgba(255,255,255,.38));
+        backdrop-filter: blur(24px) saturate(180%);
+        -webkit-backdrop-filter: blur(24px) saturate(180%);
+        border: 1px solid rgba(255,255,255,.75);
+      }
+      .auth-corner{
+        position:absolute;
+        width:20px; height:20px;
+        border-color: var(--gold-500);
+      }
+      .auth-corner.tl{top:12px; right:12px; border-top:2px solid; border-right:2px solid; border-radius:3px 6px 0 0;}
+      .auth-corner.tr{top:12px; left:12px; border-top:2px solid; border-left:2px solid; border-radius:6px 3px 0 0;}
+      .auth-corner.bl{bottom:12px; right:12px; border-bottom:2px solid; border-right:2px solid; border-radius:0 0 3px 6px;}
+      .auth-corner.br{bottom:12px; left:12px; border-bottom:2px solid; border-left:2px solid; border-radius:0 0 6px 3px;}
+
+      .auth-emblem{
+        width:96px; height:96px;
+        margin:0 auto 18px;
+        border-radius:50%;
+        position:relative;
+        background: radial-gradient(circle at 32% 26%, var(--brand-cyan) 0%, var(--brand-teal) 55%, var(--brand-blue-deep) 100%);
+        border:2px solid var(--gold-300);
+        box-shadow: 0 0 0 5px rgba(255,255,255,.35), 0 14px 28px rgba(8,50,70,.4);
+        display:flex; align-items:center; justify-content:center;
+      }
+      .auth-emblem svg{
+        width:56%;
+        height:56%;
+        filter: drop-shadow(0 3px 6px rgba(0,0,0,.2));
+      }
+    </style>
+</head>
+<body class="font-cairo py-10 px-4 sm:px-6">
+
+<div class="w-full max-w-4xl mx-auto">
+    <div class="rounded-3xl glass-card shadow-glass overflow-hidden relative p-6 sm:p-10">
+        <!-- الزوايا الزخرفية -->
+        <span class="auth-corner tl"></span>
+        <span class="auth-corner tr"></span>
+        <span class="auth-corner bl"></span>
+        <span class="auth-corner br"></span>
+
+        <!-- أزرار الإجراءات العلوية (تتبع اختباراتي + تسجيل الخروج) -->
+        <div class="flex justify-end items-center gap-2 mb-4 flex-wrap">
+            <a href="{{ url_for('applicant.applicant_test_links') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-teal/15 hover:bg-teal/25 text-navy-dark text-xs sm:text-sm font-bold border border-teal/40 transition-all shadow-sm">
+                <i class="fa-solid fa-link"></i> تتبع اختباراتي
+            </a>
+            <a href="{{ url_for('auth.logout') }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-700 text-xs sm:text-sm font-bold border border-red-300/60 transition-all shadow-sm">
+                <i class="fa-solid fa-right-from-bracket"></i> تسجيل الخروج
+            </a>
+        </div>
+
+        <!-- الهيدر واللوغو والشعار -->
+        <div class="text-center relative mb-8 pb-6 border-b border-amber-500/30">
+            <div class="auth-emblem">
+              <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path fill-rule="evenodd" fill="#FFFFFF" d="M 0,50 L 16.75,66.37 L 20.49,62.5 L 8.38,49.87 L 50.13,8.51 L 91.49,49.87 L 79.38,62.5 L 83.12,66.37 L 99.87,50.26 L 49.87,0 Z M 19.2,68.94 L 28.87,77.96 L 30.67,75.9 L 24.48,68.94 L 50.26,43.69 L 75.39,68.94 L 69.2,75.9 L 71.13,78.09 L 80.67,69.46 L 50,38.4 Z M 30.93,80.93 L 35.7,86.08 L 36.98,86.47 L 37.89,84.92 L 34.15,80.93 L 50,65.21 L 65.72,80.93 L 61.86,85.05 L 62.89,86.47 L 64.05,86.21 L 68.94,81.19 L 50,62.11 Z"/>
+                <path fill="var(--gold-300)" d="M 49.87,78.61 L 39.3,89.43 L 50.13,100 L 60.57,89.18 Z"/>
+              </svg>
+            </div>
+            <h1 class="font-['Markazi_Text'] font-bold text-3xl sm:text-4xl mb-1 text-slate-900 tracking-wide">طلب تأمين مدرب</h1>
+            <p class="text-xs sm:text-sm text-slate-700 m-0">مديرية إعداد وتطوير القادة - نظام تتبع برامج التدريب</p>
+        </div>
+
+        <div>
+            <!-- رسائل الفلاش -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                {% for category, message in messages %}
+                  <div class="mb-6 flex items-center justify-between gap-3 rounded-2xl border px-5 py-4 text-sm shadow-sm bg-white/70 backdrop-blur-md
+                              {% if category == 'danger' or category == 'error' %} border-red-300 text-red-800 bg-red-50/80
+                              {% elif category == 'success' %} border-emerald-300 text-emerald-800 bg-emerald-50/80
+                              {% else %} border-sky-300 text-sky-800 bg-sky-50/80 {% endif %}"
+                       role="alert">
+                     <span class="flex items-center gap-2 font-bold"><i class="fa-solid fa-circle-info"></i> {{ message }}</span>
+                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                  </div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+
+            <form action="{{ url_for('applicant.request_form') }}" method="POST" class="space-y-8">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                
+                <!-- القسم الأول: نطاق الطلب -->
+                <div>
+                    <h2 class="text-sm font-extrabold text-navy-dark uppercase tracking-wider mb-4 flex items-center gap-2 border-b-2 border-amber-500/30 pb-2">
+                        <i class="fa-solid fa-layer-group text-gold text-lg"></i> نطاق الفئة والجهة
+                    </h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <!-- الشريحة المستهدفة — مقفلة تلقائياً -->
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 mb-2">الشريحة المستهدفة</label>
+                            <div class="relative">
+                                <input type="text" class="w-full rounded-xl border border-slate-300 bg-white/50 text-slate-700 font-bold px-4 py-3 text-base cursor-not-allowed pl-12 shadow-sm" value="{{ locked_segment_name }}" readonly disabled>
+                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 text-lg"><i class="fa-solid fa-lock"></i></span>
+                            </div>
+                            <input type="hidden" id="target_category" name="target_category" value="{{ locked_segment_name }}">
+                        </div>
+
+                        <!-- المحافظة -->
+                        <div>
+                            <label for="governorate" class="block text-sm font-bold text-slate-700 mb-2">المحافظة <span class="text-red-500">*</span></label>
+                            <select class="w-full rounded-xl border border-slate-300 bg-white/85 px-4 py-3 text-base font-semibold focus:outline-none focus:ring-2 focus:ring-gold shadow-sm" id="governorate" name="governorate" required onchange="fetchGroups()">
+                                <option value="" selected disabled>اختر المحافظة...</option>
+                                {% for gov in governorates %}
+                                    <option value="{{ gov.name }}">{{ gov.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- القسم الثاني: المجموعات والحقائب -->
+                <div>
+                    <h2 class="text-sm font-extrabold text-navy-dark uppercase tracking-wider mb-4 flex items-center gap-2 border-b-2 border-amber-500/30 pb-2">
+                        <i class="fa-solid fa-book-open text-gold text-lg"></i> تفاصيل البرنامج التدريبي
+                    </h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <!-- المجموعة التدريبية -->
+                        <div>
+                            <label for="group_name" class="block text-sm font-bold text-slate-700 mb-2">المجموعة التدريبية <span class="text-red-500">*</span></label>
+                            <select class="w-full rounded-xl border border-slate-300 bg-white/85 px-4 py-3 text-base font-semibold focus:outline-none focus:ring-2 focus:ring-gold shadow-sm" id="group_name" name="group_name" required>
+                                <option value="" selected disabled>اختر المحافظة أولاً لفتح المجموعات...</option>
+                            </select>
+                        </div>
+
+                        <!-- الحقيبة التدريبية -->
+                        <div>
+                            <label for="course_title" class="block text-sm font-bold text-slate-700 mb-2">الحقيبة التدريبية المطلوبة <span class="text-red-500">*</span></label>
+                            <select class="w-full rounded-xl border border-slate-300 bg-white/85 px-4 py-3 text-base font-semibold focus:outline-none focus:ring-2 focus:ring-gold shadow-sm" id="course_title" name="course_title" required>
+                                <option value="" selected disabled>اختر الحقيبة التدريبية...</option>
+                                {% for course in courses %}
+                                    <option value="{{ course.title }}">{{ course.title }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- القسم الثالث: الجدولة والساعات -->
+                <div>
+                    <h2 class="text-sm font-extrabold text-navy-dark uppercase tracking-wider mb-4 flex items-center gap-2 border-b-2 border-amber-500/30 pb-2">
+                        <i class="fa-solid fa-calendar-days text-gold text-lg"></i> التوقيت والمدة الزمنية
+                    </h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                            <label for="start_date" class="block text-sm font-bold text-slate-700 mb-2">تاريخ البداية المتوقع <span class="text-red-500">*</span></label>
+                            <input type="date" class="w-full rounded-xl border border-slate-300 bg-white/85 px-4 py-3 text-base font-semibold focus:outline-none focus:ring-2 focus:ring-gold shadow-sm" id="start_date" name="start_date" required onchange="calculateDays()">
+                        </div>
+                        <div>
+                            <label for="end_date" class="block text-sm font-bold text-slate-700 mb-2">تاريخ النهاية المتوقع <span class="text-red-500">*</span></label>
+                            <input type="date" class="w-full rounded-xl border border-slate-300 bg-white/85 px-4 py-3 text-base font-semibold focus:outline-none focus:ring-2 focus:ring-gold shadow-sm" id="end_date" name="end_date" required onchange="calculateDays()">
+                        </div>
+                        <div>
+                            <label for="days_count" class="block text-sm font-bold text-slate-700 mb-2">عدد الأيام التدريبية <span class="text-red-500">*</span></label>
+                            <input type="number" class="w-full rounded-xl border border-slate-300 bg-white/85 px-4 py-3 text-base font-semibold focus:outline-none focus:ring-2 focus:ring-gold shadow-sm" id="days_count" name="days_count" min="1" placeholder="مثال: 5" required>
+                        </div>
+                        <div>
+                            <label for="hours_count" class="block text-sm font-bold text-slate-700 mb-2">إجمالي عدد الساعات <span class="text-red-500">*</span></label>
+                            <input type="number" class="w-full rounded-xl border border-slate-300 bg-white/85 px-4 py-3 text-base font-semibold focus:outline-none focus:ring-2 focus:ring-gold shadow-sm" id="hours_count" name="hours_count" min="1" placeholder="مثال: 30" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- أزرار العمليات -->
+                <div class="space-y-4 pt-6 border-t-2 border-amber-500/30">
+                    <button type="submit" class="w-full rounded-xl bg-gradient-to-r from-amber-300 to-amber-500 hover:brightness-105 text-[#052E47] py-4 text-base font-extrabold shadow-lg transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-paper-plane text-lg"></i> إرسال الطلب واعتماده
+                    </button>
+                    <a href="{{ url_for('applicant.my_requests') }}" class="w-full rounded-xl border-2 border-slate-300 bg-white/70 hover:bg-white text-slate-700 py-3.5 text-sm sm:text-base font-bold transition-colors flex items-center justify-center gap-2 text-center shadow-sm">
+                        <i class="fa-solid fa-list-check"></i> الانتقال لسجل متابعة طلباتي
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function calculateDays() {
+        const start = document.getElementById('start_date').value;
+        const end = document.getElementById('end_date').value;
+        
+        if (start && end) {
+            const startDate = new Date(start);
+            const endDate = new Date(end);
+            
+            if (endDate >= startDate) {
+                const diffTime = Math.abs(endDate - startDate);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+                document.getElementById('days_count').value = diffDays;
+            }
+        }
+    }
+
+    function fetchGroups() {
+        const category = document.getElementById('target_category').value;
+        const governorate = document.getElementById('governorate').value;
+        const groupSelect = document.getElementById('group_name');
+
+        if (!category || !governorate) return;
+
+        groupSelect.innerHTML = '<option value="" selected disabled>جاري جلب المجموعات المتاحة...</option>';
+
+        fetch(`/api/get_groups?category=${encodeURIComponent(category)}&governorate=${encodeURIComponent(governorate)}`)
+            .then(response => response.json())
+            .then(data => {
+                groupSelect.innerHTML = '<option value="" selected disabled>اختر المجموعة التدريبية...</option>';
+                if (data.groups && data.groups.length > 0) {
+                    data.groups.forEach(group => {
+                        const option = document.createElement('option');
+                        option.value = group.name || group;
+                        option.textContent = group.name || group;
+                        groupSelect.appendChild(option);
+                    });
+                } else {
+                    const option = document.createElement('option');
+                    option.value = `مجموعة ${category} - ${governorate}`;
+                    option.textContent = `مجموعة ${category} - ${governorate}`;
+                    groupSelect.appendChild(option);
+                }
+            })
+            .catch(() => {
+                groupSelect.innerHTML = '<option value="" selected disabled>اختر المجموعة...</option>';
+                const option = document.createElement('option');
+                option.value = `مجموعة ${category} - ${governorate}`;
+                option.textContent = `مجموعة ${category} - ${governorate}`;
+                groupSelect.appendChild(option);
+            });
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>أرشيف الطلبات - لوحة تحكم الإدارة</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+      crossorigin="anonymous" referrerpolicy="no-referrer">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: { cairo: ['Cairo', 'Segoe UI', 'Tahoma', 'sans-serif'] },
+        colors: {
+          navy: { dark: '#125A78', mid: '#0d435b', 950: '#081f33' },
+          teal: { DEFAULT: '#28A3CC', dark: '#1e83a4', light: '#e8f7fb' },
+          gold: { DEFAULT: '#C9A227', light: '#E4C874', dark: '#a0801d' },
+        },
+        boxShadow: {
+          glass: '0 8px 32px 0 rgba(18, 90, 120, 0.15)',
+        }
+      }
+    }
+  };
+</script>
+<style>
+  html, body { height: 100%; margin: 0; }
+  body { 
+    font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif; 
+    background: linear-gradient(135deg, #28A3CC 0%, #125A78 100%);
+    background-attachment: fixed;
+    overflow: hidden; 
+  }
+
+  .glass-card {
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+  }
+
+  .glass-nav {
+    background: rgba(18, 90, 120, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 2px solid #C9A227;
+  }
+
+  .table-scroll-wrapper::-webkit-scrollbar { width: 8px; height: 8px; }
+  .table-scroll-wrapper::-webkit-scrollbar-thumb { background: #C9A227; border-radius: 8px; }
+  .table-scroll-wrapper::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.1); }
+</style>
+</head>
+<body class="font-cairo text-slate-700">
+
+<div class="h-screen flex flex-col overflow-hidden">
+
+  <!-- الهيدر العلوي -->
+  <nav class="shrink-0 glass-nav shadow-lg text-white">
+    <div class="px-4 sm:px-6 py-3 flex items-center justify-between flex-wrap gap-3">
+      <a href="{{ url_for('admin.admin_requests') }}" class="flex items-center gap-2 font-extrabold text-lg text-white">
+        <span class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center ring-1 ring-gold/50 shadow-inner">
+          <i class="fas fa-archive text-gold"></i>
+        </span>
+        أرشيف طلبات الاحتياج التدريبي
+      </a>
+
+      <div class="flex items-center gap-3 flex-wrap">
+        <a href="{{ url_for('admin.admin_requests') }}"
+           class="inline-flex items-center gap-1.5 rounded-lg bg-gold hover:bg-gold-dark text-navy-950 text-xs font-bold px-3.5 py-2 shadow-md transition-all">
+          <i class="fas fa-arrow-right"></i> العودة للطلبات النشطة
+        </a>
+
+        <a href="{{ url_for('auth.logout') }}"
+           class="inline-flex items-center gap-1.5 rounded-lg border border-white/30 text-white hover:bg-white/10 text-xs font-bold px-3.5 py-2 transition-colors">
+          <i class="fas fa-sign-out-alt"></i> خروج
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- المحتوى الرئيسي -->
+  <div class="flex-1 overflow-y-auto overflow-x-hidden px-4 sm:px-6 py-4">
+
+    <!-- التنبيهات -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="mb-3 flex items-start justify-between gap-3 rounded-xl border px-4 py-3 text-sm shadow-sm glass-card
+                      {% if category == 'danger' %} border-red-300 text-red-800 bg-red-50/90
+                      {% elif category == 'success' %} border-emerald-300 text-emerald-800 bg-emerald-50/90
+                      {% else %} border-sky-300 text-sky-800 bg-sky-50/90 {% endif %}"
+               role="alert">
+            <span class="flex items-center gap-2"><i class="fas fa-info-circle"></i> {{ message }}</span>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <!-- شريط البحث السريع داخل الأرشيف -->
+    <div class="rounded-2xl glass-card shadow-glass mb-4 p-4">
+      <div class="relative max-w-md">
+        <i class="fas fa-search absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+        <input type="text" id="archiveSearch" placeholder="بحث سريع في الطلبات المؤرشفة..."
+               class="w-full rounded-lg border border-slate-300 bg-white/90 pr-9 pl-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold">
+      </div>
+    </div>
+
+    <!-- جدول الأرشيف -->
+    <div class="rounded-2xl glass-card shadow-glass flex flex-col" style="height: calc(100vh - 170px);" id="archiveCardWrapper">
+      <div class="flex items-center justify-between px-5 py-3 border-b border-white/40 shrink-0">
+        <h2 class="flex items-center gap-2 text-sm font-extrabold text-navy-dark">
+          <i class="fas fa-folder-open text-gold"></i> سجل الأرشيف
+          <span class="text-xs font-semibold text-slate-500">({{ archived_requests | length }})</span>
+        </h2>
+      </div>
+
+      <div class="table-scroll-wrapper overflow-auto" id="archiveScrollWrapper">
+        <table class="w-full text-xs sm:text-sm" id="archiveTable">
+          <thead>
+            <tr>
+              <th class="sticky top-0 z-10 bg-navy-dark text-white font-bold px-3 py-2.5 text-right shadow-[inset_0_-2px_0_0_#C9A227]">رمز الطلب</th>
+              <th class="sticky top-0 z-10 bg-navy-dark text-white font-bold px-3 py-2.5 text-right shadow-[inset_0_-2px_0_0_#C9A227]">مقدم الطلب</th>
+              <th class="sticky top-0 z-10 bg-navy-dark text-white font-bold px-3 py-2.5 text-right shadow-[inset_0_-2px_0_0_#C9A227]">الشريحة</th>
+              <th class="sticky top-0 z-10 bg-navy-dark text-white font-bold px-3 py-2.5 text-right shadow-[inset_0_-2px_0_0_#C9A227]">المحافظة</th>
+              <th class="sticky top-0 z-10 bg-navy-dark text-white font-bold px-3 py-2.5 text-right shadow-[inset_0_-2px_0_0_#C9A227]">الحقيبة التدريبية</th>
+              <th class="sticky top-0 z-10 bg-navy-dark text-white font-bold px-3 py-2.5 text-right shadow-[inset_0_-2px_0_0_#C9A227]">الحالة السابقة</th>
+              <th class="sticky top-0 z-10 bg-navy-dark text-white font-bold px-3 py-2.5 text-center shadow-[inset_0_-2px_0_0_#C9A227]">إجراءات</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200/60">
+            {% for req in archived_requests %}
+            <tr class="odd:bg-white/70 even:bg-white/30 hover:bg-teal/15 transition-colors">
+              <td class="px-3 py-2.5 font-extrabold text-navy-dark whitespace-nowrap">{{ req.request_code }}</td>
+              <td class="px-3 py-2.5">
+                <div class="font-semibold text-slate-800">{{ req.applicant.full_name if req.applicant else 'غير محدد' }}</div>
+                <div class="text-[11px] text-slate-500">{{ req.applicant_email }}</div>
+              </td>
+              <td class="px-3 py-2.5">
+                <span class="inline-flex items-center rounded-md bg-slate-200/80 text-slate-700 text-xs font-bold px-2 py-0.5">{{ req.target_category }}</span>
+              </td>
+              <td class="px-3 py-2.5 text-slate-700">{{ req.governorate }}</td>
+              <td class="px-3 py-2.5 font-bold text-slate-800">{{ req.course_title }}</td>
+              <td class="px-3 py-2.5">
+                <span class="inline-flex items-center rounded-full bg-slate-200 text-slate-700 text-xs font-bold px-2.5 py-0.5">{{ req.status }}</span>
+              </td>
+              <td class="px-3 py-2.5">
+                <div class="flex items-center justify-center gap-1.5">
+                  <!-- زر استعادة الطلب -->
+                  <form action="{{ url_for('admin.restore_request', req_id=req.id) }}" method="POST" class="inline"
+                        onsubmit="return confirm('هل تريد استعادة الطلب {{ req.request_code }} إلى القائمة النشطة؟');">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" title="استعادة الطلب"
+                            class="inline-flex items-center gap-1 rounded-lg border border-emerald-500 text-emerald-700 hover:bg-emerald-600 hover:text-white text-xs font-bold px-2.5 py-1 transition-colors bg-white/90 shadow-sm">
+                      <i class="fas fa-undo"></i> استعادة
+                    </button>
+                  </form>
+
+                  <!-- زر الحذف النهائي -->
+                  <form action="{{ url_for('admin.delete_archived_request', req_id=req.id) }}" method="POST" class="inline"
+                        onsubmit="return confirm('تحذير: سيتم حذف الطلب نهائياً من قاعدة البيانات. هل أنت متأكد؟');">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" title="حذف نهائي"
+                            class="inline-flex items-center justify-center rounded-lg border border-red-300 text-red-600 hover:bg-red-600 hover:text-white w-7 h-[26px] transition-colors bg-white/90">
+                      <i class="fas fa-trash-alt text-[11px]"></i>
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="7" class="text-center py-16 text-slate-500">
+                <i class="fas fa-archive text-5xl mb-3 block text-slate-400"></i>
+                لا توجد طلبات مؤرشفة حالياً.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // بحث سريع داخل الأرشيف
+  document.getElementById('archiveSearch').addEventListener('keyup', function () {
+    const filter = this.value.toLowerCase();
+    const rows = document.querySelectorAll('#archiveTable tbody tr');
+    rows.forEach(row => {
+      const text = row.textContent.toLowerCase();
+      row.style.display = text.includes(filter) ? '' : 'none';
+    });
+  });
+</script>
+</body>
+</html>

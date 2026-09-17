@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة تحكم الإدارة - إدارة الطلبات</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+      crossorigin="anonymous" referrerpolicy="no-referrer">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: { cairo: ['Cairo', 'Segoe UI', 'Tahoma', 'sans-serif'] },
+        colors: {
+          navy: { dark: '#125A78', mid: '#0d435b', 950: '#081f33' },
+          teal: { DEFAULT: '#28A3CC', dark: '#1e83a4', light: '#e8f7fb' },
+          gold: { DEFAULT: '#C9A227', light: '#E4C874', dark: '#a0801d' },
+          kpi: { green: '#22c55e', blue: '#2f80ed', orange: '#f5891f', navy: '#125A78' }
+        },
+        boxShadow: {
+          glass: '0 8px 32px 0 rgba(18, 90, 120, 0.15)',
+          'glass-hover': '0 14px 40px 0 rgba(40, 163, 204, 0.25)',
+        }
+      }
+    }
+  };
+</script>
+<style>
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  body { 
+    font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif; 
+    background: linear-gradient(135deg, #28A3CC 0%, #125A78 100%);
+    background-attachment: fixed;
+  }
+
+  .glass-card {
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+  }
+
+  .glass-nav {
+    background: rgba(18, 90, 120, 0.85);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 2px solid #C9A227;
+  }
+
+  .table-scroll-wrapper {
+    overflow: auto;
+  }
+  .table-scroll-wrapper::-webkit-scrollbar { width: 8px; height: 8px; }
+  .table-scroll-wrapper::-webkit-scrollbar-thumb { background: #C9A227; border-radius: 8px; }
+  .table-scroll-wrapper::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.1); }
+
+  select.select-clean { -webkit-appearance: none; -moz-appearance: none; appearance: none; }
+</style>
+</head>
+<body class="font-cairo text-slate-700">
+
+<div class="h-screen flex flex-col overflow-hidden">
+
+  <!-- الهيدر العلوي -->
+  <nav class="shrink-0 glass-nav shadow-lg text-white">
+    <div class="px-4 sm:px-6 py-3 flex items-center justify-between flex-wrap gap-3">
+      <a href="#" class="flex items-center gap-2 font-extrabold text-lg text-white">
+        <span class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center ring-1 ring-gold/50 shadow-inner">
+          <i class="fas fa-user-shield text-gold"></i>
+        </span>
+        لوحة تحكم الإدارة العليا
+      </a>
+
+      <div class="flex items-center gap-3 flex-wrap">
+        <span class="text-slate-100 text-sm">مرحباً، <strong class="text-gold">{{ session.get('user_name', 'المشرف') }}</strong></span>
+
+        <!-- زر إدارة المستخدمين المضاف -->
+        <a href="{{ url_for('admin.admin_users') }}"
+           class="inline-flex items-center gap-1.5 rounded-lg bg-teal hover:bg-teal-dark text-white text-xs font-bold px-3.5 py-2 shadow-md transition-all">
+          <i class="fas fa-users-cog"></i> إدارة المستخدمين
+        </a>
+
+        <a href="{{ url_for('admin.admin_matrix') }}"
+           class="inline-flex items-center gap-1.5 rounded-lg bg-gold hover:bg-gold-dark text-navy-950 text-xs font-bold px-3.5 py-2 shadow-md transition-all">
+          <i class="fas fa-th"></i> مصفوفة الإدارة (Matrix)
+        </a>
+
+        <!-- زر تتبع الاختبارات المضاف -->
+        <a href="{{ url_for('admin.admin_test_links') }}"
+           class="inline-flex items-center gap-1.5 rounded-lg bg-teal hover:bg-teal-dark text-white text-xs font-bold px-3.5 py-2 shadow-md transition-all">
+          <i class="fas fa-link"></i> تتبع الاختبارات
+        </a>
+
+        <a href="{{ url_for('auth.logout') }}"
+           class="inline-flex items-center gap-1.5 rounded-lg border border-white/30 text-white hover:bg-white/10 text-xs font-bold px-3.5 py-2 transition-colors">
+          <i class="fas fa-sign-out-alt"></i> خروج
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- المحتوى الرئيسي (يحتوي الجدول ليمتد وياخذ المساحة الكبرى) -->
+  <div class="flex-1 flex flex-col overflow-hidden px-4 sm:px-6 py-3 gap-3">
+
+    <!-- التنبيهات -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="shrink-0 mb-1 flex items-start justify-between gap-3 rounded-xl border px-4 py-2 text-sm shadow-sm glass-card
+                      {% if category == 'danger' %} border-red-300 text-red-800 bg-red-50/90
+                      {% elif category == 'success' %} border-emerald-300 text-emerald-800 bg-emerald-50/90
+                      {% elif category == 'warning' %} border-amber-300 text-amber-800 bg-amber-50/90
+                      {% else %} border-sky-300 text-sky-800 bg-sky-50/90 {% endif %}"
+               role="alert" id="flash-{{ loop.index }}">
+            <span class="flex items-center gap-2"><i class="fas fa-info-circle"></i> {{ message }}</span>
+            <button type="button" onclick="document.getElementById('flash-{{ loop.index }}').remove()"
+                    class="text-lg leading-none opacity-60 hover:opacity-100">&times;</button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <!-- بطاقات المؤشرات (KPIs) بشكل مضغوط لتوفير المساحة للجدول -->
+    <div class="shrink-0 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+      <!-- إجمالي الطلبات -->
+      <div class="relative overflow-hidden rounded-xl glass-card p-3 shadow-glass">
+        <div class="relative flex items-center gap-3">
+          <div class="w-10 h-10 shrink-0 rounded-full flex items-center justify-center text-white text-base
+                      bg-gradient-to-br from-navy-dark to-teal ring-2 ring-gold/40">
+            <i class="fas fa-clipboard-list"></i>
+          </div>
+          <div>
+            <div class="text-xl font-extrabold text-navy-dark leading-none">{{ kpis.total | default(0) }}</div>
+            <div class="text-[11px] font-bold text-slate-500 mt-1">إجمالي الطلبات</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- طلبات جديدة -->
+      <div class="relative overflow-hidden rounded-xl glass-card p-3 shadow-glass">
+        <div class="relative flex items-center gap-3">
+          <div class="w-10 h-10 shrink-0 rounded-full flex items-center justify-center text-white text-base
+                      bg-gradient-to-br from-kpi-orange to-amber-500 ring-2 ring-gold/40">
+            <i class="fas fa-star"></i>
+          </div>
+          <div>
+            <div class="text-xl font-extrabold text-navy-dark leading-none">{{ kpis.new | default(0) }}</div>
+            <div class="text-[11px] font-bold text-slate-500 mt-1">طلبات جديدة</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- جاري المعالجة -->
+      <div class="relative overflow-hidden rounded-xl glass-card p-3 shadow-glass">
+        <div class="relative flex items-center gap-3">
+          <div class="w-10 h-10 shrink-0 rounded-full flex items-center justify-center text-white text-base
+                      bg-gradient-to-br from-kpi-blue to-teal ring-2 ring-gold/40">
+            <i class="fas fa-spinner"></i>
+          </div>
+          <div>
+            <div class="text-xl font-extrabold text-navy-dark leading-none">{{ kpis.in_progress | default(0) }}</div>
+            <div class="text-[11px] font-bold text-slate-500 mt-1">جاري المعالجة</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- مكتمل -->
+      <div class="relative overflow-hidden rounded-xl glass-card p-3 shadow-glass">
+        <div class="relative flex items-center gap-3">
+          <div class="w-10 h-10 shrink-0 rounded-full flex items-center justify-center text-white text-base
+                      bg-gradient-to-br from-kpi-green to-emerald-500 ring-2 ring-gold/40">
+            <i class="fas fa-check-circle"></i>
+          </div>
+          <div>
+            <div class="text-xl font-extrabold text-navy-dark leading-none">{{ kpis.completed | default(0) }}</div>
+            <div class="text-[11px] font-bold text-slate-500 mt-1">مكتمل وتم التعاقد</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- أداة الفلترة والأزرار الإضافية -->
+    <div class="shrink-0 rounded-xl glass-card shadow-glass p-3">
+      <div class="flex items-center justify-between flex-wrap gap-2 mb-2">
+        <h2 class="flex items-center gap-2 text-xs font-extrabold text-navy-dark">
+          <i class="fas fa-filter text-gold"></i> تصفية الطلبات
+        </h2>
+        <div class="flex items-center gap-2 flex-wrap">
+          <a href="{{ url_for('admin.admin_archive') }}"
+             class="inline-flex items-center gap-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold px-3 py-1.5 shadow-sm transition-colors">
+            <i class="fas fa-archive"></i> أرشيف الطلبات
+          </a>
+          <a href="{{ url_for('admin.admin_add_request') }}"
+             class="inline-flex items-center gap-1.5 rounded-lg bg-teal hover:bg-teal-dark text-white text-xs font-bold px-3 py-1.5 shadow-sm transition-colors">
+            <i class="fas fa-plus"></i> إضافة طلب منفذ
+          </a>
+          <a href="{{ url_for('admin.export_excel', segment=sel_segment, governorate=sel_gov, group=sel_group, status=sel_status) }}"
+             class="inline-flex items-center gap-1.5 rounded-lg border border-emerald-600 text-emerald-700 hover:bg-emerald-50 text-xs font-bold px-3 py-1.5 transition-colors">
+            <i class="fas fa-file-excel"></i> إكسل
+          </a>
+        </div>
+      </div>
+
+      <form method="GET" action="{{ url_for('admin.admin_requests') }}" class="grid grid-cols-1 md:grid-cols-5 gap-2 items-center">
+        <input type="hidden" name="kpi_segment" value="{{ sel_kpi_segment }}">
+
+        <div>
+          <select name="segment" onchange="this.form.submit()"
+                  class="select-clean w-full rounded-lg border border-slate-300 bg-white/90 px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-gold">
+            <option value="ALL" {% if sel_segment == 'ALL' %}selected{% endif %}>جميع الشرائح</option>
+            {% for seg in segments %}
+              <option value="{{ seg.code }}" {% if sel_segment == seg.code %}selected{% endif %}>{{ seg.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div>
+          <select name="governorate" onchange="this.form.submit()"
+                  class="select-clean w-full rounded-lg border border-slate-300 bg-white/90 px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-gold">
+            <option value="ALL" {% if sel_gov == 'ALL' %}selected{% endif %}>جميع المحافظات</option>
+            {% for gov in governorates %}
+              <option value="{{ gov.code }}" {% if sel_gov == gov.code %}selected{% endif %}>{{ gov.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div>
+          <select name="status" onchange="this.form.submit()"
+                  class="select-clean w-full rounded-lg border border-slate-300 bg-white/90 px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-gold">
+            <option value="ALL" {% if sel_status == 'ALL' %}selected{% endif %}>جميع الحالات</option>
+            {% for st in valid_statuses %}
+              <option value="{{ st }}" {% if sel_status == st %}selected{% endif %}>{{ st }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div>
+          <input type="text" id="tableSearch" placeholder="بحث سريع..."
+                 class="w-full rounded-lg border border-slate-300 bg-white/90 px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-gold">
+        </div>
+
+        <div class="flex items-center gap-1">
+          <button type="submit"
+                  class="flex-1 inline-flex items-center justify-center gap-1 rounded-lg bg-navy-dark hover:bg-navy-mid text-white text-xs font-bold py-1.5 transition-colors shadow-sm">
+            <i class="fas fa-search"></i> تطبيق
+          </button>
+          <a href="{{ url_for('admin.admin_requests') }}" title="إعادة ضبط"
+             class="inline-flex items-center justify-center rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-100 px-2.5 py-1.5 bg-white/80">
+            <i class="fas fa-undo text-xs"></i>
+          </a>
+        </div>
+      </form>
+    </div>
+
+    <!-- جدول الطلبات (يأخذ المساحة الكبرى المتبقية مع تمرير عمودي وأفقي معاً) -->
+    <div class="flex-1 rounded-xl glass-card shadow-glass flex flex-col overflow-hidden min-h-0">
+      <div class="flex items-center justify-between px-4 py-2.5 border-b border-white/40 shrink-0 bg-white/50">
+        <h2 class="flex items-center gap-2 text-xs font-extrabold text-navy-dark">
+          <i class="fas fa-list text-gold"></i> جميع طلبات الاحتياج التدريبي
+          <span class="text-xs font-semibold text-slate-500">({{ requests | length }})</span>
+        </h2>
+      </div>
+
+      <div class="table-scroll-wrapper flex-1 w-full relative">
+        <table class="w-full text-xs sm:text-sm border-collapse whitespace-nowrap" id="requestsTable">
+          <thead>
+            <tr>
+              <th class="sticky top-0 z-20 bg-navy-dark text-white font-bold px-3 py-2 text-right shadow-[inset_0_-2px_0_0_#C9A227]">رمز الطلب</th>
+              <th class="sticky top-0 z-20 bg-navy-dark text-white font-bold px-3 py-2 text-right shadow-[inset_0_-2px_0_0_#C9A227]">مقدم الطلب</th>
+              <th class="sticky top-0 z-20 bg-navy-dark text-white font-bold px-3 py-2 text-right shadow-[inset_0_-2px_0_0_#C9A227]">الشريحة Target</th>
+              <th class="sticky top-0 z-20 bg-navy-dark text-white font-bold px-3 py-2 text-right shadow-[inset_0_-2px_0_0_#C9A227]">المحافظة</th>
+              <th class="sticky top-0 z-20 bg-navy-dark text-white font-bold px-3 py-2 text-right shadow-[inset_0_-2px_0_0_#C9A227]">المجموعة التدريبية</th>
+              <th class="sticky top-0 z-20 bg-navy-dark text-white font-bold px-3 py-2 text-right shadow-[inset_0_-2px_0_0_#C9A227]">الحقيبة التدريبية</th>
+              <th class="sticky top-0 z-20 bg-navy-dark text-white font-bold px-3 py-2 text-right shadow-[inset_0_-2px_0_0_#C9A227]">التاريخ والمدة</th>
+              <th class="sticky top-0 z-20 bg-navy-dark text-white font-bold px-3 py-2 text-right shadow-[inset_0_-2px_0_0_#C9A227]">الحالة الحالية</th>
+              <th class="sticky top-0 z-20 bg-navy-dark text-white font-bold px-3 py-2 text-right shadow-[inset_0_-2px_0_0_#C9A227]">المدرب المسند</th>
+              <th class="sticky top-0 z-20 bg-navy-dark text-white font-bold px-3 py-2 text-center shadow-[inset_0_-2px_0_0_#C9A227]">إجراءات</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200/60">
+            {% for req in requests %}
+            <tr class="odd:bg-white/70 even:bg-white/30 hover:bg-teal/15 transition-colors">
+              <td class="px-3 py-2 font-extrabold text-navy-dark">{{ req.request_code }}</td>
+              <td class="px-3 py-2">
+                <div class="font-semibold text-slate-800">{{ req.applicant.full_name if req.applicant else 'غير محدد' }}</div>
+                <div class="text-[11px] text-slate-500">{{ req.applicant_email }}</div>
+              </td>
+              <td class="px-3 py-2">
+                <span class="inline-flex items-center rounded-md bg-slate-200/80 text-slate-700 text-xs font-bold px-2 py-0.5">{{ req.target_category }}</span>
+              </td>
+              <td class="px-3 py-2 text-slate-700">{{ req.governorate }}</td>
+              <td class="px-3 py-2 text-slate-700">{{ req.group_name }}</td>
+              <td class="px-3 py-2 font-bold text-slate-800">{{ req.course_title }}</td>
+              <td class="px-3 py-2">
+                <div class="text-slate-700">{{ req.start_date }} إلى {{ req.end_date }}</div>
+                <div class="text-[11px] text-slate-500">({{ req.days_count }} أيام / {{ req.hours_count }} ساعة)</div>
+              </td>
+              <td class="px-3 py-2">
+                {% if req.status == 'طلب جديد' %}
+                  <span class="inline-flex items-center rounded-full bg-amber-100 text-amber-800 ring-1 ring-amber-300 text-xs font-bold px-2.5 py-0.5">{{ req.status }}</span>
+                {% elif req.status == 'تم الانتهاء من تنفيذ التدريب' %}
+                  <span class="inline-flex items-center rounded-full bg-emerald-100 text-emerald-800 ring-1 ring-emerald-300 text-xs font-bold px-2.5 py-0.5">{{ req.status }}</span>
+                {% elif req.status == 'لم يتم تنفيذ الطلب لتعذر الحصول على مدرب' %}
+                  <span class="inline-flex items-center rounded-full bg-red-100 text-red-800 ring-1 ring-red-300 text-xs font-bold px-2.5 py-0.5">{{ req.status }}</span>
+                {% else %}
+                  <span class="inline-flex items-center rounded-full bg-sky-100 text-sky-800 ring-1 ring-sky-300 text-xs font-bold px-2.5 py-0.5">{{ req.status }}</span>
+                {% endif %}
+              </td>
+              <td class="px-3 py-2">
+                {% if req.trainer_name %}
+                  <div class="flex items-center gap-1 text-slate-800 font-semibold"><i class="fas fa-user-tie text-emerald-600"></i> {{ req.trainer_name }}</div>
+                  <div class="flex items-center gap-1 text-[11px] text-slate-500 mt-0.5"><i class="fas fa-phone"></i> {{ req.trainer_phone or 'بدون رقم' }}</div>
+                {% else %}
+                  <span class="text-slate-400 text-xs">لم يحدد مدرب</span>
+                {% endif %}
+              </td>
+              <td class="px-3 py-2 text-center">
+                <div class="inline-flex items-center justify-center gap-1.5">
+                  <!-- زر معالجة -->
+                  <button type="button" onclick="openModal('editModal{{ req.id }}')" title="معالجة الطلب"
+                          class="inline-flex items-center gap-1 rounded-lg border border-teal text-navy-dark hover:bg-teal hover:text-white text-xs font-bold px-2 py-1 transition-colors bg-white/90 shadow-sm">
+                    <i class="fas fa-edit"></i> معالجة
+                  </button>
+
+                  <!-- زر أرشفة الطلب -->
+                  <form action="{{ url_for('admin.archive_request', req_id=req.id) }}" method="POST" class="inline"
+                        onsubmit="return confirm('هل أنت متأكد من أرشفة الطلب {{ req.request_code }}؟');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" title="أرشفة الطلب"
+                            class="inline-flex items-center justify-center rounded-lg border border-amber-400 text-amber-700 hover:bg-amber-600 hover:text-white w-7 h-[26px] transition-colors bg-white/90 shadow-sm">
+                      <i class="fas fa-archive text-[11px]"></i>
+                    </button>
+                  </form>
+
+                  <!-- زر الحذف -->
+                  <form action="{{ url_for('admin.delete_request', req_id=req.id) }}" method="POST" class="inline"
+                        onsubmit="return confirm('هل أنت متأكد من حذف الطلب {{ req.request_code }}؟');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" title="حذف الطلب"
+                            class="inline-flex items-center justify-center rounded-lg border border-red-300 text-red-600 hover:bg-red-600 hover:text-white w-7 h-[26px] transition-colors bg-white/90">
+                      <i class="fas fa-trash-alt text-[11px]"></i>
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="10" class="text-center py-16 text-slate-500">
+                <i class="fas fa-inbox text-5xl mb-3 block text-slate-400"></i>
+                لا توجد طلبات مطابقة للفلتر المحدد.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- نوافذ معالجة الطلب: انتُقلت هون خارج .glass-card عمداً. .glass-card فيها
+     backdrop-filter، وأي عنصر position:fixed جوا عنصر عليه backdrop-filter/
+     transform/filter بيصير "مؤطَّر" (containing block) بذاك العنصر بدل الشاشة
+     كاملة، فتظهر النافذة مقصوصة/مكسورة بدل full-screen overlay. -->
+{% for req in requests %}
+<div id="editModal{{ req.id }}" class="hidden fixed inset-0 z-50 items-start justify-center overflow-y-auto bg-navy-950/70 backdrop-blur-md p-4 py-8" dir="rtl">
+  <div class="bg-white/95 backdrop-blur-xl w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden text-right border border-white/50" onclick="event.stopPropagation()">
+    <form action="{{ url_for('admin.update_status', req_id=req.id) }}" method="POST">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="flex items-center justify-between bg-gradient-to-l from-navy-dark to-teal px-5 py-3.5">
+        <h3 class="text-white font-bold text-sm flex items-center gap-2"><i class="fas fa-tasks text-gold"></i> معالجة الطلب: {{ req.request_code }}</h3>
+        <button type="button" onclick="closeModal('editModal{{ req.id }}')" class="text-white/80 hover:text-white text-2xl leading-none">&times;</button>
+      </div>
+
+      <div class="px-5 py-4 space-y-3.5 max-h-[65vh] overflow-y-auto">
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">حالة الطلب</label>
+          <div class="relative">
+            <select name="status" required
+                    class="select-clean w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold bg-white">
+              {% for status_option in valid_statuses %}
+                <option value="{{ status_option }}" {% if req.status == status_option %}selected{% endif %}>{{ status_option }}</option>
+              {% endfor %}
+            </select>
+            <i class="fas fa-chevron-down absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none"></i>
+          </div>
+        </div>
+
+        <hr class="border-slate-200">
+        <h4 class="text-xs font-extrabold text-navy-dark flex items-center gap-1.5">
+          <i class="fas fa-chalkboard-teacher text-gold"></i> بيانات المدرب التعاقدية (إن وجد)
+        </h4>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">اسم المدرب</label>
+          <input type="text" name="trainer_name" value="{{ req.trainer_name or '' }}" placeholder="أدخل اسم المدرب المعين"
+                 class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold bg-white">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">رقم هاتف المدرب</label>
+          <input type="text" name="trainer_phone" value="{{ req.trainer_phone or '' }}" placeholder="05xxxxxxx"
+                 class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold bg-white">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">الأجر بالساعة (USD)</label>
+          <input type="number" step="0.01" min="0" name="hourly_rate_usd"
+                 value="{{ req.hourly_rate_usd if req.hourly_rate_usd is not none else '' }}" placeholder="مثال: 20"
+                 class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold bg-white">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-600 mb-1">ملاحظات الإدارة / السبب</label>
+          <textarea name="trainer_notes" rows="3" placeholder="أضف أي ملاحظات تظهر لمقدم الطلب..."
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold bg-white">{{ req.trainer_notes or '' }}</textarea>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 bg-slate-100 border-t border-slate-200 px-5 py-3">
+        <button type="button" onclick="closeModal('editModal{{ req.id }}')"
+                class="rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-200 text-xs font-bold px-4 py-2 transition-colors">إلغاء</button>
+        <button type="submit"
+                class="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-4 py-2 transition-colors shadow-sm">
+          <i class="fas fa-save"></i> حفظ التحديثات
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endfor %}
+
+<script>
+  document.getElementById('tableSearch').addEventListener('keyup', function () {
+    const filter = this.value.toLowerCase();
+    const rows = document.querySelectorAll('#requestsTable tbody tr');
+    rows.forEach(row => {
+      const text = row.textContent.toLowerCase();
+      row.style.display = text.includes(filter) ? '' : 'none';
+    });
+  });
+
+  function openModal(id) {
+    const modal = document.getElementById(id);
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal(id) {
+    const modal = document.getElementById(id);
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    document.body.style.overflow = 'hidden';
+  }
+  document.querySelectorAll('[id^="editModal"]').forEach(modal => {
+    modal.addEventListener('click', () => closeModal(modal.id));
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('[id^="editModal"]:not(.hidden)').forEach(m => closeModal(m.id));
+    }
+  });
+</script>
+</body>
+</html>
